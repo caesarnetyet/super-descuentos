@@ -6,19 +6,12 @@ import (
 )
 
 func main() {
-	mux := http.NewServeMux()
+	store := NewInMemoryStore()
+	server := NewServer(store)
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, World!"))
-	})
-
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
-	})
-
-	fmt.Printf("Servidor corriendo en: http://localhost:8080\n")
-	err := http.ListenAndServe(":8080", mux)
+	fmt.Println("Servidor corriendo en http://localhost:8080")
+	err := http.ListenAndServe(":8080", server)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 }

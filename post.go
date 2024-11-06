@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Post struct {
@@ -14,4 +15,23 @@ type Post struct {
 	Likes        int       `json:"likes"`
 	ExpireTime   time.Time `json:"expire_time"`
 	CreationTime time.Time `json:"creation_time"`
+}
+
+func (p Post) Validate() ValidationErrors {
+	var errs ValidationErrors
+
+	if p.Title == "" {
+		errs = append(errs, ValidationError{Field: "title", Message: "El titulo es requerido"})
+	}
+	if p.Description == "" {
+		errs = append(errs, ValidationError{Field: "description", Message: "La descripción es requerida"})
+	}
+	if p.Url == "" {
+		errs = append(errs, ValidationError{Field: "url", Message: "La URL es requerida"})
+	}
+	if p.Author.ID == uuid.Nil {
+		errs = append(errs, ValidationError{Field: "author", Message: "El autor es requerido"})
+	}
+
+	return errs
 }

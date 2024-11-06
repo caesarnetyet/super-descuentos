@@ -1,13 +1,9 @@
 package main
 
 import (
-	"errors"
-	"github.com/google/uuid"
 	"sync"
-)
 
-var (
-	ErrPostNotFound = errors.New("post no encontrado")
+	"github.com/google/uuid"
 )
 
 type InMemoryStore struct {

@@ -3,11 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/google/uuid"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func TestGetPosts(t *testing.T) {
@@ -61,10 +62,15 @@ func TestCRUDOperations(t *testing.T) {
 		setupFunc      func(*InMemoryStore) uuid.UUID
 	}{
 		{
-			name:           "Create Post",
-			method:         "POST",
-			path:           "/posts",
-			body:           Post{Title: "New Post", Description: "Description"},
+			name:   "Create Post",
+			method: "POST",
+			path:   "/posts",
+			body: Post{
+				Title:       "New Post",
+				Description: "Description",
+				Url:         "wompwomp",
+				Author:      User{ID: uuid.New()},
+			},
 			expectedStatus: http.StatusCreated,
 		},
 		{
@@ -127,7 +133,9 @@ func TestCRUDOperations(t *testing.T) {
 			server.ServeHTTP(w, req)
 
 			if w.Code != tt.expectedStatus {
-				t.Errorf("Expected status %d, got %d", tt.expectedStatus, w.Code)
+				var body interface{}
+				json.NewDecoder(w.Body).Decode(&body)
+				t.Errorf("Expected status %d, got %d. details: %q", tt.expectedStatus, w.Code, body)
 			}
 		})
 	}
@@ -140,18 +148,21 @@ func TestErrorCases(t *testing.T) {
 		path           string
 		body           interface{}
 		expectedStatus int
+		expectedBody   string
 	}{
 		{
 			name:           "Get Non-existent Post",
 			method:         "GET",
 			path:           "/posts/" + uuid.New().String(),
 			expectedStatus: http.StatusNotFound,
+			expectedBody:   "{\"message\":\"post no encontrado\"}\n",
 		},
 		{
 			name:           "Invalid UUID",
 			method:         "GET",
 			path:           "/posts/invalid-uuid",
 			expectedStatus: http.StatusBadRequest,
+			expectedBody:   "{\"message\":\"id inválido\"}\n",
 		},
 		{
 			name:           "Invalid JSON",
@@ -159,6 +170,7 @@ func TestErrorCases(t *testing.T) {
 			path:           "/posts",
 			body:           []byte(`{"invalid json"`),
 			expectedStatus: http.StatusBadRequest,
+			expectedBody:   "{\"message\":\"JSON inválido\"}\n",
 		},
 	}
 
@@ -182,7 +194,12 @@ func TestErrorCases(t *testing.T) {
 			server.ServeHTTP(w, req)
 
 			if w.Code != tt.expectedStatus {
-				t.Errorf("Expected status %d, got %d", tt.expectedStatus, w.Code)
+				body := w.Body.String()
+				t.Errorf("Expected status %d, got %d. details: %q", tt.expectedStatus, w.Code, body)
+			}
+
+			if w.Body.String() != tt.expectedBody {
+				t.Errorf("Expected body %s, got %s", tt.expectedBody, w.Body.String())
 			}
 		})
 	}

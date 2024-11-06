@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"github.com/google/uuid"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func (s *Server) handlePosts(w http.ResponseWriter, r *http.Request) {
@@ -21,16 +22,16 @@ func (s *Server) handlePosts(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handlePost(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
-	id, err := uuid.Parse(idStr)
+	id, err := s.validateUUID(idStr)
 	if err != nil {
-		http.Error(w, "invalid ID", http.StatusBadRequest)
+		s.jsonWithErrors(w, map[string]string{"message": err.Error()}, http.StatusBadRequest)
 		return
 	}
 
 	post, err := s.store.GetPost(id)
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
-			http.Error(w, err.Error(), http.StatusNotFound)
+			s.sendErrorMessage(w, err, http.StatusNotFound)
 			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -42,9 +43,20 @@ func (s *Server) handlePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCreatePost(w http.ResponseWriter, r *http.Request) {
-	var post Post
-	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	post, err := DecodeAndValidate[Post](r)
+	if err != nil {
+		switch e := err.(type) {
+		case ValidationError:
+			s.sendErrorMessage(w, errors.New(e.Message), http.StatusBadRequest)
+		case ValidationErrors:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"errors": e,
+			})
+		default:
+			http.Error(w, "error interno del servidor", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -63,15 +75,16 @@ func (s *Server) handleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleDeletePost(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
-	id, err := uuid.Parse(idStr)
+
+	id, err := s.validateUUID(idStr)
 	if err != nil {
-		http.Error(w, "invalid ID", http.StatusBadRequest)
+		s.jsonWithErrors(w, map[string]string{"message": err.Error()}, http.StatusBadRequest)
 		return
 	}
 
 	if err := s.store.DeletePost(id); err != nil {
 		if errors.Is(err, ErrPostNotFound) {
-			http.Error(w, err.Error(), http.StatusNotFound)
+			s.sendErrorMessage(w, err, http.StatusNotFound)
 			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -83,16 +96,28 @@ func (s *Server) handleDeletePost(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
-	id, err := uuid.Parse(idStr)
+
+	id, err := s.validateUUID(idStr)
 	if err != nil {
-		http.Error(w, "invalid ID", http.StatusBadRequest)
+		s.jsonWithErrors(w, map[string]string{"message": err.Error()}, http.StatusBadRequest)
 		return
 	}
 
-	var post Post
-	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	post, err := DecodeAndValidate[Post](r)
+	if err != nil {
+		switch e := err.(type) {
+		case ValidationError:
+			s.sendErrorMessage(w, errors.New(e.Message), http.StatusBadRequest)
+		case ValidationErrors:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"errors": e,
+			})
+		default:
+			http.Error(w, "error interno del servidor", http.StatusInternalServerError)
+
+		}
 	}
 
 	if err := s.store.UpdatePost(id, post); err != nil {

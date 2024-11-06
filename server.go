@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/google/uuid"
+	"encoding/json"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 type Store interface {
@@ -29,4 +31,22 @@ func NewServer(store Store) *Server {
 	router.HandleFunc("PUT /posts/{id}", s.handleUpdatePost)
 	s.Handler = router
 	return s
+}
+
+func (s *Server) validateUUID(idStr string) (uuid.UUID, error) {
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return uuid.Nil, ErrInvalidID
+	}
+	return id, nil
+}
+
+func (s *Server) jsonWithErrors(w http.ResponseWriter, v interface{}, code int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(v)
+}
+
+func (s *Server) sendErrorMessage(w http.ResponseWriter, err error, code int) {
+	s.jsonWithErrors(w, map[string]string{"message": err.Error()}, code)
 }

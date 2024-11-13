@@ -1,9 +1,12 @@
-package main
+package rest
 
 import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"super-descuentos/errs"
+	"super-descuentos/model"
+	"super-descuentos/validator"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,7 +33,7 @@ func (s *Server) handlePost(w http.ResponseWriter, r *http.Request) {
 
 	post, err := s.store.GetPost(id)
 	if err != nil {
-		if errors.Is(err, ErrPostNotFound) {
+		if errors.Is(err, errs.ErrPostNotFound) {
 			s.sendErrorMessage(w, err, http.StatusNotFound)
 			return
 		}
@@ -43,12 +46,12 @@ func (s *Server) handlePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCreatePost(w http.ResponseWriter, r *http.Request) {
-	post, err := DecodeAndValidate[Post](r)
+	post, err := validator.DecodeAndValidate[model.Post](r)
 	if err != nil {
 		switch e := err.(type) {
-		case ValidationError:
+		case validator.ValidationError:
 			s.sendErrorMessage(w, errors.New(e.Message), http.StatusBadRequest)
-		case ValidationErrors:
+		case validator.ValidationErrors:
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
@@ -83,7 +86,7 @@ func (s *Server) handleDeletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.store.DeletePost(id); err != nil {
-		if errors.Is(err, ErrPostNotFound) {
+		if errors.Is(err, errs.ErrPostNotFound) {
 			s.sendErrorMessage(w, err, http.StatusNotFound)
 			return
 		}
@@ -103,12 +106,12 @@ func (s *Server) handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := DecodeAndValidate[Post](r)
+	post, err := validator.DecodeAndValidate[model.Post](r)
 	if err != nil {
 		switch e := err.(type) {
-		case ValidationError:
+		case validator.ValidationError:
 			s.sendErrorMessage(w, errors.New(e.Message), http.StatusBadRequest)
-		case ValidationErrors:
+		case validator.ValidationErrors:
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
@@ -121,7 +124,7 @@ func (s *Server) handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.store.UpdatePost(id, post); err != nil {
-		if errors.Is(err, ErrPostNotFound) {
+		if errors.Is(err, errs.ErrPostNotFound) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}

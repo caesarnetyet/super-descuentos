@@ -1,10 +1,11 @@
-package main
+package validator
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
+	"super-descuentos/errs"
 )
 
 // ValidationError representa un error de validación con detalles
@@ -51,7 +52,7 @@ func DecodeAndValidate[T Validator](r *http.Request) (T, error) {
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		return payload, ValidationError{
 			Field:   "body",
-			Message: ErrInvalidJSON.Error(),
+			Message: errs.ErrInvalidJSON.Error(),
 		}
 	}
 	defer r.Body.Close()

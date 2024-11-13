@@ -1,10 +1,13 @@
-package main
+package rest_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"super-descuentos/model"
+	"super-descuentos/rest"
+	"super-descuentos/store"
 	"testing"
 	"time"
 
@@ -12,24 +15,24 @@ import (
 )
 
 func TestGetPosts(t *testing.T) {
-	store := NewInMemoryStore()
-	server := NewServer(store)
+	store := store.NewInMemoryStore()
+	server := rest.NewServer(store)
 
 	// Crear post de prueba
-	post1 := Post{
+	post1 := model.Post{
 		ID:           uuid.New(),
 		Title:        "Test Post 1",
 		Description:  "Description 1",
 		Url:          "https://example.com/1",
-		Author:       User{ID: uuid.New(), Name: "Author 1", Email: "author1@example.com"},
+		Author:       model.User{ID: uuid.New(), Name: "Author 1", Email: "author1@example.com"},
 		CreationTime: time.Now(),
 	}
-	post2 := Post{
+	post2 := model.Post{
 		ID:           uuid.New(),
 		Title:        "Test Post 2",
 		Description:  "Description 2",
 		Url:          "https://example.com/2",
-		Author:       User{ID: uuid.New(), Name: "Author 2", Email: "author2@example.com"},
+		Author:       model.User{ID: uuid.New(), Name: "Author 2", Email: "author2@example.com"},
 		CreationTime: time.Now(),
 	}
 
@@ -44,7 +47,7 @@ func TestGetPosts(t *testing.T) {
 		t.Errorf("Expected status %d, got %d", http.StatusOK, w.Code)
 	}
 
-	var posts []Post
+	var posts []model.Post
 	json.NewDecoder(w.Body).Decode(&posts)
 
 	if len(posts) != 2 {
@@ -59,17 +62,17 @@ func TestCRUDOperations(t *testing.T) {
 		path           string
 		body           interface{}
 		expectedStatus int
-		setupFunc      func(*InMemoryStore) uuid.UUID
+		setupFunc      func(*store.InMemoryStore) uuid.UUID
 	}{
 		{
 			name:   "Create Post",
 			method: "POST",
 			path:   "/posts",
-			body: Post{
+			body: model.Post{
 				Title:       "New Post",
 				Description: "Description",
 				Url:         "wompwomp",
-				Author:      User{ID: uuid.New()},
+				Author:      model.User{ID: uuid.New()},
 			},
 			expectedStatus: http.StatusCreated,
 		},
@@ -78,8 +81,8 @@ func TestCRUDOperations(t *testing.T) {
 			method:         "GET",
 			path:           "/posts/", // ID will be appended
 			expectedStatus: http.StatusOK,
-			setupFunc: func(store *InMemoryStore) uuid.UUID {
-				post := Post{ID: uuid.New(), Title: "Test Post"}
+			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
+				post := model.Post{ID: uuid.New(), Title: "Test Post"}
 				store.CreatePost(post)
 				return post.ID
 			},
@@ -88,15 +91,15 @@ func TestCRUDOperations(t *testing.T) {
 			name:   "Update Post",
 			method: "PUT",
 			path:   "/posts/", // ID will be appended
-			body: Post{
+			body: model.Post{
 				Title:       "Updated Post",
 				Description: "Updated Description",
 				Url:         "wompwomp",
-				Author:      User{ID: uuid.New()},
+				Author:      model.User{ID: uuid.New()},
 			},
 			expectedStatus: http.StatusOK,
-			setupFunc: func(store *InMemoryStore) uuid.UUID {
-				post := Post{ID: uuid.New(), Title: "Original Post"}
+			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
+				post := model.Post{ID: uuid.New(), Title: "Original Post"}
 				store.CreatePost(post)
 				return post.ID
 			},
@@ -106,41 +109,41 @@ func TestCRUDOperations(t *testing.T) {
 			method:         "DELETE",
 			path:           "/posts/", // ID will be appended
 			expectedStatus: http.StatusNoContent,
-			setupFunc: func(store *InMemoryStore) uuid.UUID {
-				post := Post{ID: uuid.New(), Title: "To Delete"}
+			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
+				post := model.Post{ID: uuid.New(), Title: "To Delete"}
 				store.CreatePost(post)
 				return post.ID
 			},
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			store := NewInMemoryStore()
-			server := NewServer(store)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			store := store.NewInMemoryStore()
+			server := rest.NewServer(store)
 
 			var path string
-			if tt.setupFunc != nil {
-				id := tt.setupFunc(store)
-				path = tt.path + id.String()
+			if test.setupFunc != nil {
+				id := test.setupFunc(store)
+				path = test.path + id.String()
 			} else {
-				path = tt.path
+				path = test.path
 			}
 
 			var body bytes.Buffer
-			if tt.body != nil {
-				json.NewEncoder(&body).Encode(tt.body)
+			if test.body != nil {
+				json.NewEncoder(&body).Encode(test.body)
 			}
 
-			req := httptest.NewRequest(tt.method, path, &body)
+			req := httptest.NewRequest(test.method, path, &body)
 			w := httptest.NewRecorder()
 
 			server.ServeHTTP(w, req)
 
-			if w.Code != tt.expectedStatus {
+			if w.Code != test.expectedStatus {
 				var body interface{}
 				json.NewDecoder(w.Body).Decode(&body)
-				t.Errorf("Expected status %d, got %d. details: %q", tt.expectedStatus, w.Code, body)
+				t.Errorf("Expected status %d, got %d. details: %q", test.expectedStatus, w.Code, body)
 			}
 		})
 	}
@@ -181,8 +184,8 @@ func TestErrorCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			store := NewInMemoryStore()
-			server := NewServer(store)
+			store := store.NewInMemoryStore()
+			server := rest.NewServer(store)
 
 			var body bytes.Buffer
 			if tt.body != nil {

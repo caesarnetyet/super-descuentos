@@ -85,10 +85,15 @@ func TestCRUDOperations(t *testing.T) {
 			},
 		},
 		{
-			name:           "Update Post",
-			method:         "PUT",
-			path:           "/posts/", // ID will be appended
-			body:           Post{Title: "Updated Post", Description: "Updated Description"},
+			name:   "Update Post",
+			method: "PUT",
+			path:   "/posts/", // ID will be appended
+			body: Post{
+				Title:       "Updated Post",
+				Description: "Updated Description",
+				Url:         "wompwomp",
+				Author:      User{ID: uuid.New()},
+			},
 			expectedStatus: http.StatusOK,
 			setupFunc: func(store *InMemoryStore) uuid.UUID {
 				post := Post{ID: uuid.New(), Title: "Original Post"}

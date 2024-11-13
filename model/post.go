@@ -1,7 +1,6 @@
 package model
 
 import (
-	"super-descuentos/validator"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,20 +17,20 @@ type Post struct {
 	CreationTime time.Time `json:"creation_time"`
 }
 
-func (p Post) Validate() validator.ValidationErrors {
-	var errs validator.ValidationErrors
+func (p Post) Validate() ValidationErrors {
+	var errs ValidationErrors
 
 	if p.Title == "" {
-		errs = append(errs, validator.ValidationError{Field: "title", Message: "El titulo es requerido"})
+		errs = append(errs, ValidationError{Field: "title", Message: "El titulo es requerido"})
 	}
 	if p.Description == "" {
-		errs = append(errs, validator.ValidationError{Field: "description", Message: "La descripción es requerida"})
+		errs = append(errs, ValidationError{Field: "description", Message: "La descripción es requerida"})
 	}
 	if p.Url == "" {
-		errs = append(errs, validator.ValidationError{Field: "url", Message: "La URL es requerida"})
+		errs = append(errs, ValidationError{Field: "url", Message: "La URL es requerida"})
 	}
 	if p.Author.ID == uuid.Nil {
-		errs = append(errs, validator.ValidationError{Field: "author", Message: "El autor es requerido"})
+		errs = append(errs, ValidationError{Field: "author", Message: "El autor es requerido"})
 	}
 
 	return errs

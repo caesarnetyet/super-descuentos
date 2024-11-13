@@ -1,28 +1,16 @@
 package rest
 
 import (
-	"encoding/json"
 	"net/http"
-	"super-descuentos/errs"
-	"super-descuentos/model"
-
-	"github.com/google/uuid"
+	"super-descuentos/store"
 )
 
-type Store interface {
-	CreatePost(post model.Post) error
-	DeletePost(id uuid.UUID) error
-	UpdatePost(id uuid.UUID, post model.Post) error
-	GetPost(id uuid.UUID) (model.Post, error)
-	GetPosts() ([]model.Post, error)
-}
-
 type Server struct {
-	store Store
+	store store.Store
 	http.Handler
 }
 
-func NewServer(store Store) *Server {
+func NewServer(store store.Store) *Server {
 	s := new(Server)
 	s.store = store
 	router := http.NewServeMux()
@@ -33,22 +21,4 @@ func NewServer(store Store) *Server {
 	router.HandleFunc("PUT /posts/{id}", s.handleUpdatePost)
 	s.Handler = router
 	return s
-}
-
-func (s *Server) validateUUID(idStr string) (uuid.UUID, error) {
-	id, err := uuid.Parse(idStr)
-	if err != nil {
-		return uuid.Nil, errs.ErrInvalidID
-	}
-	return id, nil
-}
-
-func (s *Server) jsonWithErrors(w http.ResponseWriter, v interface{}, code int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(v)
-}
-
-func (s *Server) sendErrorMessage(w http.ResponseWriter, err error, code int) {
-	s.jsonWithErrors(w, map[string]string{"message": err.Error()}, code)
 }

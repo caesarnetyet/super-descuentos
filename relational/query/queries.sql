@@ -2,10 +2,10 @@
 INSERT INTO posts (id, title, description, url, author_id, likes, expire_time, creation_time)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: DeletePost :exec
+-- name: DeletePost :execresult
 DELETE FROM posts WHERE id = ?;
 
--- name: UpdatePost :exec
+-- name: UpdatePost :execresult
 UPDATE posts
 SET title = ?, description = ?, url = ?, likes = ?, expire_time = ?
 WHERE id = ?;

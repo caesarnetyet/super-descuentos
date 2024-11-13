@@ -1,4 +1,4 @@
-package store
+package relational
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"super-descuentos/model"
-	"super-descuentos/relational"
 	"super-descuentos/relational/repository"
 )
 
@@ -24,6 +23,7 @@ func NewSQLStore(db *sql.DB) *SQLStore {
 }
 
 func (S SQLStore) CreatePost(ctx context.Context, post model.Post) error {
+
 	err := S.Queries.CreatePost(ctx, repository.CreatePostParams{
 		ID:           post.ID.String(),
 		Title:        post.Title,
@@ -43,17 +43,25 @@ func (S SQLStore) CreatePost(ctx context.Context, post model.Post) error {
 }
 
 func (S SQLStore) DeletePost(ctx context.Context, id uuid.UUID) error {
-	err := S.Queries.DeletePost(ctx, id.String())
+	result, err := S.Queries.DeletePost(ctx, id.String())
 	if err != nil {
 		_ = fmt.Errorf("hubo un problema al intentar eliminar el post: %v", err)
 		return errors.New("hubo un problema al intentar eliminar el post")
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error checking rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no se encontró un post con el ID: %s", id.String())
 	}
 
 	return nil
 }
 
 func (S SQLStore) UpdatePost(ctx context.Context, id uuid.UUID, post model.Post) error {
-	err := S.Queries.UpdatePost(ctx, repository.UpdatePostParams{
+	result, err := S.Queries.UpdatePost(ctx, repository.UpdatePostParams{
 		ID:          id.String(),
 		Title:       post.Title,
 		Description: post.Description,
@@ -64,6 +72,15 @@ func (S SQLStore) UpdatePost(ctx context.Context, id uuid.UUID, post model.Post)
 	if err != nil {
 		_ = fmt.Errorf("hubo un problema al intentar actualizar el post: %v", err)
 		return errors.New("hubo un problema al intentar actualizar el post")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error checking rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no se encontró un post con el ID: %s", id.String())
 	}
 
 	return nil
@@ -81,7 +98,7 @@ func (S SQLStore) GetPost(ctx context.Context, id uuid.UUID) (model.Post, error)
 		return model.Post{}, errors.New("hubo un problema al intentar obtener al autor")
 	}
 
-	return relational.RepositoryPostToModel(post, user), nil
+	return RepositoryPostToModel(post, user), nil
 }
 
 func (S SQLStore) GetPosts(ctx context.Context, offset, limit int) ([]model.Post, error) {
@@ -101,7 +118,7 @@ func (S SQLStore) GetPosts(ctx context.Context, offset, limit int) ([]model.Post
 
 	postsWithAuthor := make([]model.Post, 0, limit)
 	for _, post := range posts {
-		postsWithAuthor = append(postsWithAuthor, relational.RepositoryPostToModel(post.Post, post.User))
+		postsWithAuthor = append(postsWithAuthor, RepositoryPostToModel(post.Post, post.User))
 
 	}
 

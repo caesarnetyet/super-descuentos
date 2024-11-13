@@ -7,6 +7,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -40,13 +41,12 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 	return err
 }
 
-const deletePost = `-- name: DeletePost :exec
+const deletePost = `-- name: DeletePost :execresult
 DELETE FROM posts WHERE id = ?
 `
 
-func (q *Queries) DeletePost(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, deletePost, id)
-	return err
+func (q *Queries) DeletePost(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deletePost, id)
 }
 
 const getPost = `-- name: GetPost :one
@@ -143,7 +143,7 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 	return i, err
 }
 
-const updatePost = `-- name: UpdatePost :exec
+const updatePost = `-- name: UpdatePost :execresult
 UPDATE posts
 SET title = ?, description = ?, url = ?, likes = ?, expire_time = ?
 WHERE id = ?
@@ -158,8 +158,8 @@ type UpdatePostParams struct {
 	ID          string
 }
 
-func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) error {
-	_, err := q.db.ExecContext(ctx, updatePost,
+func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updatePost,
 		arg.Title,
 		arg.Description,
 		arg.Url,
@@ -167,5 +167,4 @@ func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) error {
 		arg.ExpireTime,
 		arg.ID,
 	)
-	return err
 }

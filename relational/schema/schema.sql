@@ -1,3 +1,6 @@
+-- Enable foreign key constraints
+PRAGMA foreign_keys = ON;
+
 CREATE TABLE users (
                        id TEXT PRIMARY KEY,
                        name TEXT NOT NULL,

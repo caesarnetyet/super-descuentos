@@ -43,11 +43,10 @@ func NewServer(store Store) *Server {
 	s := new(Server)
 	s.store = store
 
-	templates, err := template.ParseGlob("templates/**/*.html")
-	if err != nil {
-		panic(err)
+	// Intentar cargar templates, pero no fallar si no existen
+	if templates, err := template.ParseGlob("templates/**/*.html"); err == nil {
+		s.templates = templates
 	}
-	s.templates = templates
 
 	router := http.NewServeMux()
 
@@ -58,19 +57,24 @@ func NewServer(store Store) *Server {
 	router.HandleFunc("DELETE /api/posts/{id}", s.handleDeletePost)
 	router.HandleFunc("PUT /api/posts/{id}", s.handleUpdatePost)
 
-	// Rutas para las vistas web
-	router.HandleFunc("GET /web/posts", s.handlePostsPage)
+	// Rutas para las vistas web (solo si hay templates)
+	if s.templates != nil {
+		router.HandleFunc("GET /web/posts", s.handlePostsPage)
+		router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/" {
+				http.Redirect(w, r, "/web/posts", http.StatusFound)
+				return
+			}
+		})
 
-	// Redireccion ruta raíz
-	router.HandleFunc("GET /", s.handleHome)
-
-	// Archivos estáticos
-	router.HandleFunc("GET /static/{file}", func(w http.ResponseWriter, r *http.Request) {
-		file := r.PathValue("file")
-		if file == "script.js" || file == "style.css" {
-			http.ServeFile(w, r, filepath.Join("templates/posts", file))
-		}
-	})
+		// Archivos estáticos
+		router.HandleFunc("GET /static/{file}", func(w http.ResponseWriter, r *http.Request) {
+			file := r.PathValue("file")
+			if file == "script.js" || file == "style.css" {
+				http.ServeFile(w, r, filepath.Join("templates/posts", file))
+			}
+		})
+	}
 
 	s.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/api/") {
@@ -82,7 +86,6 @@ func NewServer(store Store) *Server {
 
 	return s
 }
-
 func (s *Server) validateUUID(idStr string) (uuid.UUID, error) {
 	id, err := uuid.Parse(idStr)
 	if err != nil {

@@ -21,7 +21,7 @@ func (server *Server) handlePostsPage(w http.ResponseWriter, r *http.Request) {
 	}{
 		Posts: posts,
 	}
-	err = server.templates.ExecuteTemplate(w, "posts.html", data)
+	err = server.templates.ExecuteTemplate(w, "posts/posts.html", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

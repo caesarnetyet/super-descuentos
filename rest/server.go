@@ -43,7 +43,7 @@ func NewServer(store Store) *Server {
 	s := new(Server)
 	s.store = store
 
-	templates, err := template.ParseGlob(filepath.Join("templates", "*.html"))
+	templates, err := template.ParseGlob("templates/**/*.html")
 	if err != nil {
 		panic(err)
 	}
@@ -60,9 +60,18 @@ func NewServer(store Store) *Server {
 
 	// Rutas para las vistas web
 	router.HandleFunc("GET /web/posts", s.handlePostsPage)
+
+	// Redireccion ruta raíz
 	router.HandleFunc("GET /", s.handleHome)
 
-	// Aplicar CORS a todas las rutas /api/
+	// Archivos estáticos
+	router.HandleFunc("GET /static/{file}", func(w http.ResponseWriter, r *http.Request) {
+		file := r.PathValue("file")
+		if file == "script.js" || file == "style.css" {
+			http.ServeFile(w, r, filepath.Join("templates/posts", file))
+		}
+	})
+
 	s.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/api/") {
 			enableCORS(router).ServeHTTP(w, r)

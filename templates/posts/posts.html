@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Super Descuentos</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+</head>
+<body>
+    <h1>Super Descuentos</h1>
+    <div id="posts-list">
+        {{range .Posts}}
+        <div class="post">
+            <div class="post-header">
+                <h3>{{.Title}}</h3>
+                <div class="likes">
+                    <button onclick="likePost('{{.ID}}')">👍 {{.Likes}}</button>
+                </div>
+            </div>
+            <p>{{.Description}}</p>
+            <a href="{{.Url}}" class="post-link" target="_blank">Ver descuento</a>
+            <div class="post-meta">
+                <span>Por: {{.Author.Name}}</span>
+                <span class="timestamp">Creado: {{.CreationTime.Format "02/01/2006 15:04"}}</span>
+                <span class="timestamp">Expira: {{.ExpireTime.Format "02/01/2006 15:04"}}</span>
+            </div>
+            <button onclick="deletePost('{{.ID}}')">Eliminar</button>
+        </div>
+        {{end}}
+    </div>
+    <hr>
+    <h2>Crear Nuevo Descuento</h2>
+    <form id="create-post-form">
+        <div>
+            <label>Título:</label>
+            <input type="text" id="title" required>
+            <div class="error" id="title-error"></div>
+        </div>
+        <div>
+            <label>Descripción:</label>
+            <textarea id="description" required></textarea>
+            <div class="error" id="description-error"></div>
+        </div>
+        <div>
+            <label>URL del descuento:</label>
+            <input type="url" id="url" required>
+            <div class="error" id="url-error"></div>
+        </div>
+        <div>
+            <label>Tiempo de expiración:</label>
+            <input type="datetime-local" id="expire-time" required>
+            <div class="error" id="expire-time-error"></div>
+        </div>
+        <button type="submit">Publicar Descuento</button>
+    </form>
+
+    <script src="script.js"></script>
+</body>
+</html>

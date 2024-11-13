@@ -39,7 +39,7 @@ func TestGetPosts(t *testing.T) {
 	store.CreatePost(post1)
 	store.CreatePost(post2)
 
-	req := httptest.NewRequest("GET", "/posts", nil)
+	req := httptest.NewRequest("GET", "/api/posts", nil)
 	w := httptest.NewRecorder()
 	server.ServeHTTP(w, req)
 
@@ -161,21 +161,21 @@ func TestErrorCases(t *testing.T) {
 		{
 			name:           "Get Non-existent Post",
 			method:         "GET",
-			path:           "/posts/" + uuid.New().String(),
+			path:           "/api/posts/" + uuid.New().String(),
 			expectedStatus: http.StatusNotFound,
 			expectedBody:   "{\"message\":\"post no encontrado\"}\n",
 		},
 		{
 			name:           "Invalid UUID",
 			method:         "GET",
-			path:           "/posts/invalid-uuid",
+			path:           "/api/posts/invalid-uuid",
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   "{\"message\":\"id inválido\"}\n",
 		},
 		{
 			name:           "Invalid JSON",
 			method:         "POST",
-			path:           "/posts",
+			path:           "/api/posts",
 			body:           []byte(`{"invalid json"`),
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   "{\"message\":\"JSON inválido\"}\n",

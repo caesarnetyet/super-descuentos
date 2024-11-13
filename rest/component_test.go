@@ -45,6 +45,7 @@ func TestGetPosts(t *testing.T) {
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status %d, got %d", http.StatusOK, w.Code)
+
 	}
 
 	var posts []model.Post
@@ -67,7 +68,7 @@ func TestCRUDOperations(t *testing.T) {
 		{
 			name:   "Create Post",
 			method: "POST",
-			path:   "/posts",
+			path:   "/api/posts",
 			body: model.Post{
 				Title:       "New Post",
 				Description: "Description",
@@ -79,7 +80,7 @@ func TestCRUDOperations(t *testing.T) {
 		{
 			name:           "Get Post",
 			method:         "GET",
-			path:           "/posts/", // ID will be appended
+			path:           "/api/posts/", // ID will be appended
 			expectedStatus: http.StatusOK,
 			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
 				post := model.Post{ID: uuid.New(), Title: "Test Post"}
@@ -90,7 +91,7 @@ func TestCRUDOperations(t *testing.T) {
 		{
 			name:   "Update Post",
 			method: "PUT",
-			path:   "/posts/", // ID will be appended
+			path:   "/api/posts/", // ID will be appended
 			body: model.Post{
 				Title:       "Updated Post",
 				Description: "Updated Description",
@@ -107,7 +108,7 @@ func TestCRUDOperations(t *testing.T) {
 		{
 			name:           "Delete Post",
 			method:         "DELETE",
-			path:           "/posts/", // ID will be appended
+			path:           "/api/posts/", // ID will be appended
 			expectedStatus: http.StatusNoContent,
 			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
 				post := model.Post{ID: uuid.New(), Title: "To Delete"}

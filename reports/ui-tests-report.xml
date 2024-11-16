@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="6" failures="3">
+	<testsuite name="super-descuentos/tests/ui" tests="6" failures="3" errors="0" id="0" hostname="1eff500d21fb" time="62.891" timestamp="2024-11-15T01:45:28Z">
+		<testcase name="TestConnectionToApp" classname="super-descuentos/tests/ui" time="2.820">
+			<system-out><![CDATA[    posts_test.go:95: TEST: Conexión inicial a http://172.18.0.2:8080
+    posts_test.go:109: ✅ Conexión exitosa (2.78s)]]></system-out>
+		</testcase>
+		<testcase name="TestPostsUI" classname="super-descuentos/tests/ui" time="60.070">
+			<failure message="Failed"><![CDATA[    posts_test.go:114: TEST SUITE: UI Posts en http://172.18.0.2:8080]]></failure>
+		</testcase>
+		<testcase name="TestPostsUI/Carga_de_página" classname="super-descuentos/tests/ui" time="2.330">
+			<system-out><![CDATA[    posts_test.go:142: ✅ Página cargada en intento 1 (2.33s)]]></system-out>
+		</testcase>
+		<testcase name="TestPostsUI/Crear_post" classname="super-descuentos/tests/ui" time="2.320">
+			<system-out><![CDATA[    posts_test.go:166: ✅ Post creado: 'Test Post from UI' (2.32s)]]></system-out>
+		</testcase>
+		<testcase name="TestPostsUI/Eliminar_post" classname="super-descuentos/tests/ui" time="55.120">
+			<failure message="Failed"><![CDATA[    posts_test.go:182: ❌ Error al eliminar post: context deadline exceeded]]></failure>
+		</testcase>
+		<testcase name="TestPostsUI/Validación_de_formulario" classname="super-descuentos/tests/ui" time="0.000">
+			<failure message="Failed"><![CDATA[    posts_test.go:199: ❌ Error en validación del formulario: context deadline exceeded]]></failure>
+		</testcase>
+	</testsuite>
+</testsuites>

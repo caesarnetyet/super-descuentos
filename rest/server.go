@@ -1,27 +1,15 @@
 package rest
 
 import (
-	"encoding/json"
 	"html/template"
 	"net/http"
 	"path/filepath"
 	"strings"
-	"super-descuentos/errs"
-	"super-descuentos/model"
-
-	"github.com/google/uuid"
+	"super-descuentos/store"
 )
 
-type Store interface {
-	CreatePost(post model.Post) error
-	DeletePost(id uuid.UUID) error
-	UpdatePost(id uuid.UUID, post model.Post) error
-	GetPost(id uuid.UUID) (model.Post, error)
-	GetPosts() ([]model.Post, error)
-}
-
 type Server struct {
-	store     Store
+	store     store.Store
 	templates *template.Template
 	http.Handler
 }
@@ -39,7 +27,20 @@ func enableCORS(next http.Handler) http.Handler {
 	})
 }
 
-func NewServer(store Store) *Server {
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func NewServer(store store.Store) *Server {
 	s := new(Server)
 	s.store = store
 

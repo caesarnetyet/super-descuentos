@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"super-descuentos/errs"
 	"super-descuentos/model"
 	"sync"
@@ -19,7 +20,7 @@ func NewInMemoryStore() *InMemoryStore {
 	}
 }
 
-func (s *InMemoryStore) CreatePost(post model.Post) error {
+func (s *InMemoryStore) CreatePost(_ context.Context, post model.Post) error {
 	s.Lock()
 	defer s.Unlock()
 
@@ -30,7 +31,7 @@ func (s *InMemoryStore) CreatePost(post model.Post) error {
 	return nil
 }
 
-func (s *InMemoryStore) DeletePost(id uuid.UUID) error {
+func (s *InMemoryStore) DeletePost(_ context.Context, id uuid.UUID) error {
 	s.Lock()
 	defer s.Unlock()
 
@@ -41,7 +42,7 @@ func (s *InMemoryStore) DeletePost(id uuid.UUID) error {
 	return nil
 }
 
-func (s *InMemoryStore) UpdatePost(id uuid.UUID, post model.Post) error {
+func (s *InMemoryStore) UpdatePost(_ context.Context, id uuid.UUID, post model.Post) error {
 	s.Lock()
 	defer s.Unlock()
 
@@ -53,7 +54,7 @@ func (s *InMemoryStore) UpdatePost(id uuid.UUID, post model.Post) error {
 	return nil
 }
 
-func (s *InMemoryStore) GetPost(id uuid.UUID) (model.Post, error) {
+func (s *InMemoryStore) GetPost(_ context.Context, id uuid.UUID) (model.Post, error) {
 	s.RLock()
 	defer s.RUnlock()
 
@@ -64,13 +65,18 @@ func (s *InMemoryStore) GetPost(id uuid.UUID) (model.Post, error) {
 	return post, nil
 }
 
-func (s *InMemoryStore) GetPosts() ([]model.Post, error) {
+func (s *InMemoryStore) GetPosts(_ context.Context, limit, offset int) ([]model.Post, error) {
 	s.RLock()
 	defer s.RUnlock()
 
-	posts := make([]model.Post, 0, len(s.posts))
+	posts := make([]model.Post, 0, limit)
 	for _, post := range s.posts {
 		posts = append(posts, post)
+
+		if len(posts) == limit {
+			break
+		}
 	}
+
 	return posts, nil
 }

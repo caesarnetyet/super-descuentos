@@ -1,0 +1,14 @@
+version: 2
+sql:
+  - engine: "sqlite"
+    schema: "relational/schema"   # Path to your SQLite schema
+    queries: "relational/query" # Path to your custom SQL queries
+    gen:
+      go:
+        package: "repository"        # Package name where generated code will be placed
+        out: "relational/repository"        # Output directory for generated code
+        overrides:
+          - db_type: "uuid"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"

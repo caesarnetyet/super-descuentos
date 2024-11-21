@@ -2,6 +2,7 @@ package rest_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -36,8 +37,10 @@ func TestGetPosts(t *testing.T) {
 		CreationTime: time.Now(),
 	}
 
-	store.CreatePost(post1)
-	store.CreatePost(post2)
+	ctx := context.Background()
+
+	store.CreatePost(ctx, post1)
+	store.CreatePost(ctx, post2)
 
 	req := httptest.NewRequest("GET", "/api/posts", nil)
 	w := httptest.NewRecorder()
@@ -57,6 +60,7 @@ func TestGetPosts(t *testing.T) {
 }
 
 func TestCRUDOperations(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name           string
 		method         string
@@ -84,7 +88,7 @@ func TestCRUDOperations(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
 				post := model.Post{ID: uuid.New(), Title: "Test Post"}
-				store.CreatePost(post)
+				store.CreatePost(ctx, post)
 				return post.ID
 			},
 		},
@@ -101,7 +105,7 @@ func TestCRUDOperations(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
 				post := model.Post{ID: uuid.New(), Title: "Original Post"}
-				store.CreatePost(post)
+				store.CreatePost(ctx, post)
 				return post.ID
 			},
 		},
@@ -112,7 +116,7 @@ func TestCRUDOperations(t *testing.T) {
 			expectedStatus: http.StatusNoContent,
 			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
 				post := model.Post{ID: uuid.New(), Title: "To Delete"}
-				store.CreatePost(post)
+				store.CreatePost(ctx, post)
 				return post.ID
 			},
 		},

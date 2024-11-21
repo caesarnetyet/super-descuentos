@@ -29,9 +29,11 @@ func (p Post) Validate() ValidationErrors {
 	if p.Url == "" {
 		errs = append(errs, ValidationError{Field: "url", Message: "La URL es requerida"})
 	}
-	if p.Author.ID == uuid.Nil {
-		errs = append(errs, ValidationError{Field: "author", Message: "El autor es requerido"})
-	}
+
+	// Comentado por mientras pq me da hueva hacer el crud de autores, atte: El Sebas
+	/* if p.Author.ID == uuid.Nil {
+		errs = append(errs, validator.ValidationError{Field: "author", Message: "El autor es requerido"})
+	} */
 
 	return errs
 }

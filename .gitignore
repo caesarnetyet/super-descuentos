@@ -1,3 +1,6 @@
 .idea
 super-descuentos
+vendor/
+.mod
+reports/
 *.db

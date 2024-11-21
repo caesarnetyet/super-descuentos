@@ -42,12 +42,13 @@ func TestGetPosts(t *testing.T) {
 	store.CreatePost(ctx, post1)
 	store.CreatePost(ctx, post2)
 
-	req := httptest.NewRequest("GET", "/posts", nil)
+	req := httptest.NewRequest("GET", "/api/posts", nil)
 	w := httptest.NewRecorder()
 	server.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status %d, got %d", http.StatusOK, w.Code)
+
 	}
 
 	var posts []model.Post
@@ -71,7 +72,7 @@ func TestCRUDOperations(t *testing.T) {
 		{
 			name:   "Create Post",
 			method: "POST",
-			path:   "/posts",
+			path:   "/api/posts",
 			body: model.Post{
 				Title:       "New Post",
 				Description: "Description",
@@ -83,7 +84,7 @@ func TestCRUDOperations(t *testing.T) {
 		{
 			name:           "Get Post",
 			method:         "GET",
-			path:           "/posts/", // ID will be appended
+			path:           "/api/posts/", // ID will be appended
 			expectedStatus: http.StatusOK,
 			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
 				post := model.Post{ID: uuid.New(), Title: "Test Post"}
@@ -94,7 +95,7 @@ func TestCRUDOperations(t *testing.T) {
 		{
 			name:   "Update Post",
 			method: "PUT",
-			path:   "/posts/", // ID will be appended
+			path:   "/api/posts/", // ID will be appended
 			body: model.Post{
 				Title:       "Updated Post",
 				Description: "Updated Description",
@@ -111,7 +112,7 @@ func TestCRUDOperations(t *testing.T) {
 		{
 			name:           "Delete Post",
 			method:         "DELETE",
-			path:           "/posts/", // ID will be appended
+			path:           "/api/posts/", // ID will be appended
 			expectedStatus: http.StatusNoContent,
 			setupFunc: func(store *store.InMemoryStore) uuid.UUID {
 				post := model.Post{ID: uuid.New(), Title: "To Delete"}
@@ -165,21 +166,21 @@ func TestErrorCases(t *testing.T) {
 		{
 			name:           "Get Non-existent Post",
 			method:         "GET",
-			path:           "/posts/" + uuid.New().String(),
+			path:           "/api/posts/" + uuid.New().String(),
 			expectedStatus: http.StatusNotFound,
 			expectedBody:   "{\"message\":\"post no encontrado\"}\n",
 		},
 		{
 			name:           "Invalid UUID",
 			method:         "GET",
-			path:           "/posts/invalid-uuid",
+			path:           "/api/posts/invalid-uuid",
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   "{\"message\":\"id inválido\"}\n",
 		},
 		{
 			name:           "Invalid JSON",
 			method:         "POST",
-			path:           "/posts",
+			path:           "/api/posts",
 			body:           []byte(`{"invalid json"`),
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   "{\"message\":\"JSON inválido\"}\n",

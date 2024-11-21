@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+
+# Binarios y temporales
+/super-descuentos
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Directorios de dependencias
+/vendor/
+/bin/
+/dist/
+
+# Sistema
+.DS_Store

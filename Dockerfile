@@ -21,3 +21,8 @@ CMD ["/super-descuentos"]
 #   build --------> docker build -t super-descuentos .
 #   list images --> docker image ls
 #   run ----------> docker run -p 8080:8080 super-descuentos
+
+
+# docker build -t super-descuentos .
+# docker images
+# docker run -p 8080:8080 super-descuentos

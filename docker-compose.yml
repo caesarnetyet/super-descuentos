@@ -18,25 +18,6 @@ services:
       retries: 3
       start_period: 5s
 
-  tests:
-    build:
-      context: .
-      dockerfile: Dockerfile.ui-tests
-    depends_on:
-      app:
-        condition: service_healthy
-
-    environment:
-      - APP_URL=http://172.18.0.2:8080
-      - CHROMEDP_LOG=debug
-      - TEST_ENV=true
-
-
-    networks:
-      - testing-network
-    volumes:
-      - ./reports:/app/reports
-
 networks:
   testing-network:
     driver: bridge

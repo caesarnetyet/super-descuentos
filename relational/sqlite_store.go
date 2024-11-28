@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"super-descuentos/errs"
 	"super-descuentos/model"
 	"super-descuentos/relational/repository"
 )
@@ -23,8 +24,13 @@ func NewSQLStore(db *sql.DB) *SQLStore {
 }
 
 func (S SQLStore) CreatePost(ctx context.Context, post model.Post) error {
+	_, err := S.Queries.GetUser(ctx, post.Author.ID.String())
 
-	err := S.Queries.CreatePost(ctx, repository.CreatePostParams{
+	if err != nil {
+		_ = fmt.Errorf("hubo un problema al intentar obtener al autor: %v", err)
+		return errs.ErrAuthorNotFound
+	}
+	err = S.Queries.CreatePost(ctx, repository.CreatePostParams{
 		ID:           post.ID.String(),
 		Title:        post.Title,
 		Description:  post.Description,
@@ -110,6 +116,7 @@ func (S SQLStore) GetPosts(ctx context.Context, offset, limit int) ([]model.Post
 		Limit:  int64(limit),
 		Offset: int64(offset),
 	})
+	fmt.Printf("posts: %v\n", posts)
 
 	if err != nil {
 		_ = fmt.Errorf("hubo un problema al intentar obtener los posts: %v", err)

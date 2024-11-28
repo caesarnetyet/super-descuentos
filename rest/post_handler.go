@@ -21,8 +21,11 @@ func (s *Server) handlePosts(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := s.store.GetPosts(r.Context(), offset, limit)
 	if err != nil {
+		if errors.Is(err, errs.ErrPostNotFound) {
+			utils.SendErrorMessage(w, err, http.StatusNotFound)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -73,6 +76,10 @@ func (s *Server) handleCreatePost(w http.ResponseWriter, r *http.Request) {
 	post.CreationTime = time.Now()
 
 	if err := s.store.CreatePost(r.Context(), post); err != nil {
+		if errors.Is(err, errs.ErrAuthorNotFound) {
+			utils.SendErrorMessage(w, err, http.StatusNotFound)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

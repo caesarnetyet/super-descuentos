@@ -1,33 +1,39 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"net/http"
-	"os"
+	"super-descuentos/relational"
 	"super-descuentos/rest"
-	"super-descuentos/store"
+	"super-descuentos/web"
 )
 
 func main() {
-	store := store.NewInMemoryStore()
-	server := rest.NewServer(store)
-
-	// Get port from environment variable or use default
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	// Disable automatic HTTPS redirect in test environment
-	if os.Getenv("TEST_ENV") == "true" {
-		http.DefaultServeMux = http.NewServeMux()
-	}
-
-	addr := fmt.Sprintf(":%s", port)
-	fmt.Printf("Servidor corriendo en http://localhost%s\n", addr)
-
-	err := http.ListenAndServe(addr, server)
+	// sqlite db
+	db, err := sql.Open("sqlite3", "./super-descuentos.db")
 	if err != nil {
 		fmt.Println(err)
+		return
+	}
+	store := relational.NewSQLStore(db)
+	apiServer := rest.NewServer(store)
+	webServer := web.NewServer(store)
+
+	// Create the handler for routing
+	handler := http.NewServeMux()
+
+	// API handler with prefix stripping
+	handler.Handle("/api/", http.StripPrefix("/api", apiServer))
+
+	// Web server handler for all other routes
+	handler.Handle("/", webServer)
+
+	// Start the HTTP server
+	port := ":8080"
+	fmt.Printf("Starting server on port %s...\n", port)
+	if err := http.ListenAndServe(port, handler); err != nil {
+		fmt.Println("Error starting server:", err)
 	}
 }

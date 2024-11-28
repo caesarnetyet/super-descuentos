@@ -3,6 +3,7 @@ package rest
 import (
 	"net/http"
 	"super-descuentos/model"
+	"super-descuentos/utils"
 )
 
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -11,7 +12,12 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) handlePostsPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	posts, err := server.store.GetPosts()
+	offset, limit, err := utils.GetOffsetAndLimit(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	posts, err := server.store.GetPosts(r.Context(), offset, limit)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

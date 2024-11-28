@@ -26,20 +26,6 @@ func enableCORS(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-
-func enableCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
 func NewServer(store store.Store) *Server {
 	s := new(Server)
 	s.store = store
@@ -86,21 +72,4 @@ func NewServer(store store.Store) *Server {
 	})
 
 	return s
-}
-func (s *Server) validateUUID(idStr string) (uuid.UUID, error) {
-	id, err := uuid.Parse(idStr)
-	if err != nil {
-		return uuid.Nil, errs.ErrInvalidID
-	}
-	return id, nil
-}
-
-func (s *Server) jsonWithErrors(w http.ResponseWriter, v interface{}, code int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(v)
-}
-
-func (s *Server) sendErrorMessage(w http.ResponseWriter, err error, code int) {
-	s.jsonWithErrors(w, map[string]string{"message": err.Error()}, code)
 }

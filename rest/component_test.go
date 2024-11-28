@@ -156,63 +156,63 @@ func TestCRUDOperations(t *testing.T) {
 
 func TestErrorCases(t *testing.T) {
 	tests := []struct {
-		name           string
-		method         string
-		path           string
-		body           interface{}
-		expectedStatus int
-		expectedBody   string
+		Name           string
+		Method         string
+		Path           string
+		Body           interface{}
+		ExpectedStatus int
+		ExpectedBody   string
 	}{
 		{
-			name:           "Get Non-existent Post",
-			method:         "GET",
-			path:           "/api/posts/" + uuid.New().String(),
-			expectedStatus: http.StatusNotFound,
-			expectedBody:   "{\"message\":\"post no encontrado\"}\n",
+			Name:           "Get Non-existent Post",
+			Method:         "GET",
+			Path:           "/api/posts/" + uuid.New().String(),
+			ExpectedStatus: http.StatusNotFound,
+			ExpectedBody:   "{\"message\":\"post no encontrado\"}\n",
 		},
 		{
-			name:           "Invalid UUID",
-			method:         "GET",
-			path:           "/api/posts/invalid-uuid",
-			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "{\"message\":\"id inválido\"}\n",
+			Name:           "Invalid UUID",
+			Method:         "GET",
+			Path:           "/api/posts/invalid-uuid",
+			ExpectedStatus: http.StatusBadRequest,
+			ExpectedBody:   "{\"message\":\"id inválido\"}\n",
 		},
 		{
-			name:           "Invalid JSON",
-			method:         "POST",
-			path:           "/api/posts",
-			body:           []byte(`{"invalid json"`),
-			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "{\"message\":\"JSON inválido\"}\n",
+			Name:           "Invalid JSON",
+			Method:         "POST",
+			Path:           "/api/posts",
+			Body:           []byte(`{"invalid json"`),
+			ExpectedStatus: http.StatusBadRequest,
+			ExpectedBody:   "{\"message\":\"JSON inválido\"}\n",
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
 			store := store.NewInMemoryStore()
 			server := rest.NewServer(store)
 
 			var body bytes.Buffer
-			if tt.body != nil {
-				if jsonBytes, ok := tt.body.([]byte); ok {
+			if test.Body != nil {
+				if jsonBytes, ok := test.Body.([]byte); ok {
 					body = *bytes.NewBuffer(jsonBytes)
 				} else {
-					json.NewEncoder(&body).Encode(tt.body)
+					json.NewEncoder(&body).Encode(test.Body)
 				}
 			}
 
-			req := httptest.NewRequest(tt.method, tt.path, &body)
+			req := httptest.NewRequest(test.Method, test.Path, &body)
 			w := httptest.NewRecorder()
 
 			server.ServeHTTP(w, req)
 
-			if w.Code != tt.expectedStatus {
+			if w.Code != test.ExpectedStatus {
 				body := w.Body.String()
-				t.Errorf("Expected status %d, got %d. details: %q", tt.expectedStatus, w.Code, body)
+				t.Errorf("Expected status %d, got %d. details: %q", test.ExpectedStatus, w.Code, body)
 			}
 
-			if w.Body.String() != tt.expectedBody {
-				t.Errorf("Expected body %s, got %s", tt.expectedBody, w.Body.String())
+			if w.Body.String() != test.ExpectedBody {
+				t.Errorf("Expected body %s, got %s", test.ExpectedBody, w.Body.String())
 			}
 		})
 	}

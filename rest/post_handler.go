@@ -14,6 +14,10 @@ import (
 
 func (s *Server) handlePosts(w http.ResponseWriter, r *http.Request) {
 	offset, limit, err := utils.GetOffsetAndLimit(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	posts, err := s.store.GetPosts(r.Context(), offset, limit)
 	if err != nil {

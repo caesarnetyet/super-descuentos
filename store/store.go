@@ -2,8 +2,9 @@ package store
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"super-descuentos/model"
+
+	"github.com/google/uuid"
 )
 
 type Store interface {

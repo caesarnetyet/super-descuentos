@@ -20,7 +20,7 @@ func getBaseURL() string {
 	return "http://localhost:8080"
 }
 
-func takeScreenshot(ctx context.Context, name string, testName string) chromedp.ActionFunc {
+func takeScreenshot(_ context.Context, name string, testName string) chromedp.ActionFunc {
 	return chromedp.ActionFunc(func(ctx context.Context) error {
 		// Crear directorio si no existe
 		screenshotPath := filepath.Join("screenshots", testName)
@@ -56,7 +56,7 @@ func takeScreenshot(ctx context.Context, name string, testName string) chromedp.
 	})
 }
 
-func setupChrome(t *testing.T) (context.Context, context.CancelFunc) {
+func setupChrome(_ *testing.T) (context.Context, context.CancelFunc) {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.ExecPath("/usr/bin/chromium"),
 		chromedp.Flag("headless", true),

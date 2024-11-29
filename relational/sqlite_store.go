@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"super-descuentos/errs"
 	"super-descuentos/model"
 	"super-descuentos/relational/repository"
+
+	"github.com/google/uuid"
 )
 
 type SQLStore struct {
@@ -116,10 +117,9 @@ func (S SQLStore) GetPosts(ctx context.Context, offset, limit int) ([]model.Post
 		Limit:  int64(limit),
 		Offset: int64(offset),
 	})
-	fmt.Printf("posts: %v\n", posts)
 
 	if err != nil {
-		_ = fmt.Errorf("hubo un problema al intentar obtener los posts: %v", err)
+		fmt.Printf("hubo un problema al intentar obtener los posts: %v", err)
 		return nil, errors.New("hubo un problema al intentar obtener los posts")
 	}
 

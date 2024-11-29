@@ -1,0 +1,27 @@
+package components
+
+import (
+    "super-descuentos/model"
+)
+
+
+templ HomePage(posts []model.Post) {
+	<div class="row">
+		if len(posts) > 0 {
+			for _, post := range posts {
+				<div class="col-md-4 mb-3">
+					<div class="card">
+						<div class="card-body">
+							<h5 class="card-title">{ post.Title }</h5>
+							<h6 class="card-subtitle mb-2 text-muted">By { post.Author.Name }</h6>
+							<p class="card-text">{ post.Description }</p>
+                            <a target="_blank" href={templ.SafeURL(post.Url)}  class="card-link">Go to offer</a>
+						</div>
+					</div>
+				</div>
+			}
+		} else {
+			<p>No se encontraron posts en el sistema</p>
+		}
+	</div>
+}

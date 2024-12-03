@@ -32,3 +32,8 @@ LIMIT ? OFFSET ?;
 SELECT id, name, email
 FROM users
 WHERE id = ?;
+
+-- name: GetAuthors :many
+SELECT id, name, email
+FROM users
+LIMIT ? OFFSET ?;

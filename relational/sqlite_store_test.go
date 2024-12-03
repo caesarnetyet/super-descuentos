@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 	"os"
 	"path/filepath"
 	"super-descuentos/relational"
@@ -42,7 +42,7 @@ func loadSQLFile(t *testing.T, db *sql.DB, filename string) {
 
 // setupTestDB initializes a test database with schema and seed data
 func setupTestDB(t *testing.T) *testDB {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 
 	// Load schema and seed data

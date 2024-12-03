@@ -13,7 +13,7 @@ import (
 	"super-descuentos/model"
 )
 
-func PostsPage(authors []model.User, posts []model.Post) templ.Component {
+func PostsPage(authors []model.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -70,7 +70,7 @@ func PostsPage(authors []model.User, posts []model.Post) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div><div class=\"mb-3\"><label for=\"discount\" class=\"form-label\">Discount (%)</label> <input type=\"number\" class=\"form-control\" id=\"discount\" name=\"discount\" min=\"0\" max=\"100\" step=\"0.1\"></div><button type=\"submit\" class=\"btn btn-primary\">Create Post</button></form></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div><div class=\"mb-3\"><label for=\"url\" class=\"form-label\">Link a la oferta:</label> <input type=\"text\" class=\"form-control\" id=\"url\" name=\"url\" required></div><button type=\"submit\" class=\"btn btn-primary\">Create Post</button></form></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

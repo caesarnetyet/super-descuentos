@@ -2,7 +2,6 @@ package rest
 
 import (
 	"net/http"
-	"strings"
 	"super-descuentos/store"
 )
 
@@ -23,6 +22,7 @@ func enableCORS(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
 func NewServer(store store.Store) *Server {
 	s := new(Server)
 	s.store = store
@@ -37,11 +37,7 @@ func NewServer(store store.Store) *Server {
 	router.HandleFunc("PUT /posts/{id}", s.handleUpdatePost)
 
 	s.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/api/") {
-			enableCORS(router).ServeHTTP(w, r)
-		} else {
-			router.ServeHTTP(w, r)
-		}
+		enableCORS(router).ServeHTTP(w, r)
 	})
 
 	return s

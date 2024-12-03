@@ -24,14 +24,14 @@ func NewSQLStore(db *sql.DB) *SQLStore {
 	}
 }
 
-func (S SQLStore) CreatePost(ctx context.Context, post model.Post) error {
-	_, err := S.Queries.GetUser(ctx, post.Author.ID.String())
+func (store *SQLStore) CreatePost(ctx context.Context, post model.Post) error {
+	_, err := store.Queries.GetUser(ctx, post.Author.ID.String())
 
 	if err != nil {
 		_ = fmt.Errorf("hubo un problema al intentar obtener al autor: %v", err)
 		return errs.ErrAuthorNotFound
 	}
-	err = S.Queries.CreatePost(ctx, repository.CreatePostParams{
+	err = store.Queries.CreatePost(ctx, repository.CreatePostParams{
 		ID:           post.ID.String(),
 		Title:        post.Title,
 		Description:  post.Description,
@@ -49,8 +49,8 @@ func (S SQLStore) CreatePost(ctx context.Context, post model.Post) error {
 	return nil
 }
 
-func (S SQLStore) DeletePost(ctx context.Context, id uuid.UUID) error {
-	result, err := S.Queries.DeletePost(ctx, id.String())
+func (store *SQLStore) DeletePost(ctx context.Context, id uuid.UUID) error {
+	result, err := store.Queries.DeletePost(ctx, id.String())
 	if err != nil {
 		_ = fmt.Errorf("hubo un problema al intentar eliminar el post: %v", err)
 		return errors.New("hubo un problema al intentar eliminar el post")
@@ -67,8 +67,8 @@ func (S SQLStore) DeletePost(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (S SQLStore) UpdatePost(ctx context.Context, id uuid.UUID, post model.Post) error {
-	result, err := S.Queries.UpdatePost(ctx, repository.UpdatePostParams{
+func (store *SQLStore) UpdatePost(ctx context.Context, id uuid.UUID, post model.Post) error {
+	result, err := store.Queries.UpdatePost(ctx, repository.UpdatePostParams{
 		ID:          id.String(),
 		Title:       post.Title,
 		Description: post.Description,
@@ -92,14 +92,14 @@ func (S SQLStore) UpdatePost(ctx context.Context, id uuid.UUID, post model.Post)
 
 	return nil
 }
-func (S SQLStore) GetPost(ctx context.Context, id uuid.UUID) (model.Post, error) {
-	post, err := S.Queries.GetPost(ctx, id.String())
+func (store *SQLStore) GetPost(ctx context.Context, id uuid.UUID) (model.Post, error) {
+	post, err := store.Queries.GetPost(ctx, id.String())
 	if err != nil {
 		_ = fmt.Errorf("hubo un problema al intentar obtener el post: %v", err)
 		return model.Post{}, errors.New("hubo un problema al intentar obtener el post")
 	}
 
-	user, err := S.Queries.GetUser(ctx, post.AuthorID)
+	user, err := store.Queries.GetUser(ctx, post.AuthorID)
 	if err != nil {
 		_ = fmt.Errorf("hubo un problema al intentar obtener al autor: %v", err)
 		return model.Post{}, errors.New("hubo un problema al intentar obtener al autor")
@@ -108,12 +108,12 @@ func (S SQLStore) GetPost(ctx context.Context, id uuid.UUID) (model.Post, error)
 	return RepositoryPostToModel(post, user), nil
 }
 
-func (S SQLStore) GetPosts(ctx context.Context, offset, limit int) ([]model.Post, error) {
+func (store *SQLStore) GetPosts(ctx context.Context, offset, limit int) ([]model.Post, error) {
 	if limit == 0 {
 		limit = 10
 	}
 
-	posts, err := S.Queries.GetPostsWithAuthor(ctx, repository.GetPostsWithAuthorParams{
+	posts, err := store.Queries.GetPostsWithAuthor(ctx, repository.GetPostsWithAuthorParams{
 		Limit:  int64(limit),
 		Offset: int64(offset),
 	})

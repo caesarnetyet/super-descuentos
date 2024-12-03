@@ -18,3 +18,11 @@ func RepositoryPostToModel(post repository.Post, user repository.User) model.Pos
 		CreationTime: post.CreationTime,
 	}
 }
+
+func RepositoryAuthorToModel(author repository.User) model.User {
+	return model.User{
+		ID:    uuid.MustParse(author.ID),
+		Name:  author.Name,
+		Email: author.Email,
+	}
+}

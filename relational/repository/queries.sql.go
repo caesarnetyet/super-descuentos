@@ -49,6 +49,40 @@ func (q *Queries) DeletePost(ctx context.Context, id string) (sql.Result, error)
 	return q.db.ExecContext(ctx, deletePost, id)
 }
 
+const getAuthors = `-- name: GetAuthors :many
+SELECT id, name, email
+FROM users
+LIMIT ? OFFSET ?
+`
+
+type GetAuthorsParams struct {
+	Limit  int64
+	Offset int64
+}
+
+func (q *Queries) GetAuthors(ctx context.Context, arg GetAuthorsParams) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getAuthors, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(&i.ID, &i.Name, &i.Email); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPost = `-- name: GetPost :one
 SELECT
     id, title, description, url, author_id, likes, expire_time, creation_time

@@ -12,6 +12,29 @@ import (
 type InMemoryStore struct {
 	sync.RWMutex
 	posts map[uuid.UUID]model.Post
+	users map[uuid.UUID]model.User
+}
+
+func (s *InMemoryStore) CreateUser(_ context.Context, user model.User) error {
+	s.Lock()
+	defer s.Unlock()
+
+	if user.ID == uuid.Nil {
+		user.ID = uuid.New()
+	}
+
+	s.users[user.ID] = user
+	return nil
+}
+
+func (s *InMemoryStore) GetAuthors(ctx context.Context, offset, limit int) ([]model.User, error) {
+	var users []model.User
+
+	for _, user := range s.users {
+		users = append(users, user)
+	}
+
+	return users, nil
 }
 
 func NewInMemoryStore() *InMemoryStore {

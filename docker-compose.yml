@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -7,10 +5,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    networks:
-      testing-network:
-        aliases:
-          - app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://app:8080/web/posts"]
       interval: 5s
@@ -18,6 +12,22 @@ services:
       retries: 3
       start_period: 5s
 
-networks:
-  testing-network:
-    driver: bridge
+  # Playwright test service
+  tests:
+    image: mcr.microsoft.com/playwright:v1.49.0-noble
+    ipc: host  # Improve performance
+    volumes:
+      - ./e2e:/e2e  # Mount your e2e test directory
+    working_dir: /e2e
+    environment:
+      - BASE_URL=http://app:8080
+    depends_on:
+      - app
+    command: >
+      sh -c "
+        cd /e2e
+        npm init -y
+        npm install @playwright/test
+        npx playwright install-deps
+        npx playwright test
+      "

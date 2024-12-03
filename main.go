@@ -32,9 +32,9 @@ func main() {
 	handler.Handle("/", webServer)
 
 	// Start the HTTP server
-	port := ":8080"
-	fmt.Printf("Starting server on port %s...\n", port)
-	if err := http.ListenAndServe(port, handler); err != nil {
+	hostName := "0.0.0.0:8080"
+	fmt.Printf("Starting server on %s...\n", hostName)
+	if err := http.ListenAndServe(hostName, handler); err != nil {
 		fmt.Println("Error starting server:", err)
 	}
 }

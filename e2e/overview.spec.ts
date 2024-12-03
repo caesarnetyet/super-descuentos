@@ -1,5 +1,9 @@
 import { test, expect } from '@playwright/test';
 
+test.use({
+  ignoreHTTPSErrors: true,
+});
+
 // Configuration - adjust these to match your application's setup
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
@@ -7,6 +11,7 @@ test.describe('Super Descuentos Application E2E Tests', () => {
   // Test creating a new author
   test('create a new author', async ({ page }) => {
     await page.goto(`${BASE_URL}/authors`);
+    await page.screenshot({path: 'screenshots/authors.png'});
 
     // Fill out author creation form
     await page.fill('input[name="name"]', 'Test Author');
@@ -25,6 +30,7 @@ test.describe('Super Descuentos Application E2E Tests', () => {
   // Test creating a new post
   test('create a new post', async ({ page }) => {
     await page.goto(`${BASE_URL}/posts`);
+    await page.screenshot({path: 'screenshots/posts.png'});
 
     // First, ensure we have an author to select
     await page.goto(`${BASE_URL}/authors`);
@@ -55,6 +61,7 @@ test.describe('Super Descuentos Application E2E Tests', () => {
   test('home page displays posts', async ({ page }) => {
     // Ensure at least one post exists
     await page.goto(`${BASE_URL}/posts`);
+    await page.screenshot({path: 'screenshots/posts.png'});
     
     // If no posts exist, create one
     const noPostsMessage = await page.getByText('No se encontraron posts en el sistema').isVisible();
@@ -83,6 +90,7 @@ test.describe('Super Descuentos Application E2E Tests', () => {
   // Test external link functionality
   test('post external link works', async ({ page, context }) => {
     await page.goto(`${BASE_URL}/`);
+    await page.screenshot({path: 'screenshots/home.png'});
 
     // Find the first external link and open it in a new page
     const firstExternalLink = await page.locator('.card-link').first();

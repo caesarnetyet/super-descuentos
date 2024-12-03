@@ -4,3 +4,4 @@ vendor/
 .mod
 reports/
 *.db
+e2e/node_modules

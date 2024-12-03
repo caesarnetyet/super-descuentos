@@ -19,3 +19,5 @@
 
 # Sistema
 .DS_Store
+
+e2e/node_modules

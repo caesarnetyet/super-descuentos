@@ -41,12 +41,41 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 	return err
 }
 
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (id, name, email)
+VALUES (?, ?, ?)
+`
+
+type CreateUserParams struct {
+	ID    string
+	Name  string
+	Email string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.ExecContext(ctx, createUser, arg.ID, arg.Name, arg.Email)
+	return err
+}
+
 const deletePost = `-- name: DeletePost :execresult
 DELETE FROM posts WHERE id = ?
 `
 
 func (q *Queries) DeletePost(ctx context.Context, id string) (sql.Result, error) {
 	return q.db.ExecContext(ctx, deletePost, id)
+}
+
+const getAuthorByEmail = `-- name: GetAuthorByEmail :one
+SELECT id, name, email
+FROM users
+WHERE email = ?
+`
+
+func (q *Queries) GetAuthorByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getAuthorByEmail, email)
+	var i User
+	err := row.Scan(&i.ID, &i.Name, &i.Email)
+	return i, err
 }
 
 const getAuthors = `-- name: GetAuthors :many

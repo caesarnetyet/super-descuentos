@@ -3,16 +3,17 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"net/http"
 	"super-descuentos/relational"
 	"super-descuentos/rest"
 	"super-descuentos/web"
+
+	_ "modernc.org/sqlite"
 )
 
 func main() {
 	// sqlite db
-	db, err := sql.Open("sqlite3", "./super-descuentos.db")
+	db, err := sql.Open("sqlite", "./super-descuentos.db")
 	if err != nil {
 		fmt.Println(err)
 		return

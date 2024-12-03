@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	_ "modernc.org/sqlite"
 	"os"
 	"path/filepath"
 	"super-descuentos/relational"
 	"testing"
 	"time"
+
+	_ "modernc.org/sqlite"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"

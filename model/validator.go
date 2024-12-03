@@ -2,10 +2,13 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"reflect"
+	"strconv"
 	"strings"
-	"super-descuentos/errs"
 )
 
 // ValidationError representa un error de validación con detalles
@@ -30,37 +33,121 @@ func (e ValidationErrors) Error() string {
 }
 
 // Validator es una interfaz que deben implementar las estructuras que requieren validación
-type Validator interface {
+type HttpValidator interface {
 	Validate() ValidationErrors
 }
 
-// DecodeAndValidate es una función genérica que decodifica y valida una petición HTTP
-// T debe ser un tipo que implemente Validator
-func DecodeAndValidate[T Validator](r *http.Request) (T, error) {
+// DecodeAndValidate decodes and validates an HTTP request based on the Content-Type.
+func DecodeAndValidate[T HttpValidator](r *http.Request) (T, error) {
 	var payload T
 
-	// Verificar Content-Type
-	// contentType := r.Header.Get("Content-Type")
-	// if contentType != "application/json" {
-	// 	return payload, ValidationError{
-	// 		Field:   "Content-Type",
-	// 		Message: "el tipo de contenido debe ser application/json",
-	// 	}
-	// }
-
-	// Decodificar el cuerpo de la petición
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	switch r.Header.Get("Content-Type") {
+	case "application/json":
+		if err := decodeJSON(r, &payload); err != nil {
+			return payload, err
+		}
+	case "application/x-www-form-urlencoded", "multipart/form-data":
+		if err := decodeForm(r, &payload); err != nil {
+			return payload, err
+		}
+	default:
 		return payload, ValidationError{
-			Field:   "body",
-			Message: errs.ErrInvalidJSON.Error(),
+			Field:   "Content-Type",
+			Message: "unsupported content type",
 		}
 	}
-	defer r.Body.Close()
 
-	// Validar la estructura
+	// Validate the decoded struct.
 	if errs := payload.Validate(); len(errs) > 0 {
 		return payload, errs
 	}
 
 	return payload, nil
+}
+
+// decodeJSON decodes a JSON request body into the given struct.
+func decodeJSON[T any](r *http.Request, target *T) error {
+	defer r.Body.Close()
+	if err := json.NewDecoder(r.Body).Decode(target); err != nil {
+		return ValidationError{
+			Field:   "body",
+			Message: "invalid JSON payload",
+		}
+	}
+	return nil
+}
+
+// decodeForm decodes form data and populates the given struct.
+func decodeForm[T any](r *http.Request, target *T) error {
+	if err := r.ParseForm(); err != nil {
+		return ValidationError{
+			Field:   "body",
+			Message: "invalid form data",
+		}
+	}
+	return populateStructFromForm(r.Form, target)
+}
+
+// populateStructFromForm populates the struct fields from form data using reflection.
+func populateStructFromForm[T any](form url.Values, outputStruct *T) error {
+	v := reflect.ValueOf(outputStruct)
+	if v.Kind() != reflect.Pointer || v.Elem().Kind() != reflect.Struct {
+		return errors.New("outputStruct must be a pointer to a struct")
+	}
+
+	v = v.Elem()
+	t := v.Type()
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		formTag := field.Tag.Get("form")
+		if formTag == "" {
+			continue
+		}
+
+		formValue, exists := form[formTag]
+		if !exists || len(formValue) == 0 {
+			continue
+		}
+
+		err := setFieldValue(v.Field(i), formValue[0])
+		if err != nil {
+			return fmt.Errorf("failed to set field %q: %v", field.Name, err)
+		}
+	}
+	return nil
+}
+
+// setFieldValue sets the value of a reflect.Value from a string value.
+func setFieldValue(field reflect.Value, value string) error {
+	if !field.CanSet() {
+		return errors.New("cannot set field")
+	}
+
+	switch field.Kind() {
+	case reflect.String:
+		field.SetString(value)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		intValue, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return err
+		}
+		field.SetInt(intValue)
+	case reflect.Float32, reflect.Float64:
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return err
+		}
+		field.SetFloat(floatValue)
+	case reflect.Bool:
+		boolValue, err := strconv.ParseBool(value)
+		if err != nil {
+			return err
+		}
+		field.SetBool(boolValue)
+	default:
+		return fmt.Errorf("unsupported field type: %s", field.Kind().String())
+	}
+
+	return nil
 }

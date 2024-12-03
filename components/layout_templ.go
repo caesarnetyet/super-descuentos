@@ -42,7 +42,7 @@ func Layout(title string, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" - Discount Posts App</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\"></head><body><nav class=\"navbar navbar-expand-lg navbar-light bg-light\"><div class=\"container\"><a class=\"navbar-brand\" href=\"/\">Discount Posts</a><div class=\"navbar-nav\"><a class=\"nav-item nav-link\" href=\"/\">Home</a> <a class=\"nav-item nav-link\" href=\"/authors\">Add author</a> <a class=\"nav-item nav-link\" href=\"/posts\">Create Post</a></div></div></nav><div class=\"container mt-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" - Discount Posts App</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n\t\t@view-transition {\r\n \t \t\tnavigation: auto;\r\n\t\t}\r\n\t\t</style></head><body><nav class=\"navbar navbar-expand-lg navbar-light bg-light\"><div class=\"container\"><a class=\"navbar-brand\" href=\"/\">Discount Posts</a><div class=\"navbar-nav\"><a class=\"nav-item nav-link\" href=\"/\">Home</a> <a class=\"nav-item nav-link\" href=\"/authors\">Add author</a> <a class=\"nav-item nav-link\" href=\"/posts\">Create Post</a></div></div></nav><div class=\"container mt-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

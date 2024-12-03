@@ -2,10 +2,13 @@ package utils
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
+	"errors"
 	"net/http"
 	"strconv"
 	"super-descuentos/errs"
+	"super-descuentos/model"
+
+	"github.com/google/uuid"
 )
 
 func ValidateUUID(idStr string) (uuid.UUID, error) {
@@ -47,4 +50,23 @@ func JsonWithErrors(w http.ResponseWriter, v interface{}, code int) {
 
 func SendErrorMessage(w http.ResponseWriter, err error, code int) {
 	JsonWithErrors(w, map[string]string{"message": err.Error()}, code)
+}
+
+func HandleErrorResponse(w http.ResponseWriter, err error) {
+	var validationError model.ValidationError
+	var validationErrors model.ValidationErrors
+
+	switch {
+	case errors.As(err, &validationError):
+		// Single validation error
+		SendErrorMessage(w, err, http.StatusBadRequest)
+
+	case errors.As(err, &validationErrors):
+		// Multiple validation errors
+		JsonWithErrors(w, map[string]interface{}{"errors": err}, http.StatusBadRequest)
+
+	default:
+		// Generic server error
+		http.Error(w, "Hubo un problema en tu petición, inténtalo de nuevo más tarde.", http.StatusInternalServerError)
+	}
 }

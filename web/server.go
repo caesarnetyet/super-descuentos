@@ -15,10 +15,10 @@ func NewServer(store store.Store) *Server {
 	server.store = store
 
 	router := http.NewServeMux()
-	router.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Posts"))
-	})
+	router.HandleFunc("/posts", server.handlePostForm)
+	router.HandleFunc("POST /posts", server.handleCreatePostForm)
 	router.HandleFunc("/authors", server.handleAuthorForm)
+	router.HandleFunc("POST /authors", server.handleCreateAuthorForm)
 	router.HandleFunc("/", server.handleHome)
 
 	server.Handler = router

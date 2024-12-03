@@ -33,7 +33,17 @@ SELECT id, name, email
 FROM users
 WHERE id = ?;
 
+-- name: CreateUser :exec
+INSERT INTO users (id, name, email)
+VALUES (?, ?, ?);
+
 -- name: GetAuthors :many
 SELECT id, name, email
 FROM users
 LIMIT ? OFFSET ?;
+
+-- name: GetAuthorByEmail :one
+SELECT id, name, email
+FROM users
+WHERE email = ?;
+

@@ -103,3 +103,24 @@ func (s *InMemoryStore) GetPosts(_ context.Context, limit, offset int) ([]model.
 
 	return posts, nil
 }
+
+func (s *InMemoryStore) CreateAuthor(ctx context.Context, author model.User) error {
+	s.Lock()
+	defer s.Unlock()
+
+	if author.ID == uuid.Nil {
+		author.ID = uuid.New()
+	}
+	s.users[author.ID] = author
+	return nil
+}
+
+func (s *InMemoryStore) GetAuthorByEmail(ctx context.Context, email string) (model.User, error) {
+	for _, user := range s.users {
+		if user.Email == email {
+			return user, nil
+		}
+	}
+
+	return model.User{}, errs.ErrAuthorNotFound
+}

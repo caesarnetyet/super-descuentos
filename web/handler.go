@@ -22,9 +22,4 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	component := components.Layout("Home", components.HomePage(posts))
 	component.Render(r.Context(), w)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 }

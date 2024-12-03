@@ -1,6 +1,7 @@
 package model
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,6 +16,14 @@ type Post struct {
 	Likes        int       `json:"likes"`
 	ExpireTime   time.Time `json:"expire_time"`
 	CreationTime time.Time `json:"creation_time"`
+}
+
+func PostFromFormData(r http.Request) Post {
+	return Post{
+		Title:       r.FormValue("title"),
+		Description: r.FormValue("description"),
+		Url:         r.FormValue("url"),
+	}
 }
 
 func (p Post) Validate() ValidationErrors {

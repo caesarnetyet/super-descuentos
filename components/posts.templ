@@ -2,7 +2,6 @@ package components
 
 import (
 
-    "fmt"
     "super-descuentos/model"
 )
 
@@ -20,11 +19,11 @@ templ PostsPage(authors []model.User) {
 					<textarea class="form-control" id="content" name="content" rows="3" required></textarea>
 				</div>
 				<div class="mb-3">
-					<label for="author" class="form-label">Author</label>
-					<select class="form-select" id="author" name="author" required>
+					<label for="author_email" class="form-label">Author</label>
+					<select class="form-select" id="author_email" name="author_email" required>
 						<option value="">Select an Author</option>
 						for _, author := range authors {
-							<option value={ fmt.Sprintf("%d", author.ID) }>{ author.Name }</option>
+							<option value={ author.Email }>{ author.Name } - { author.Email }</option>
 						}
 					</select>
 				</div>

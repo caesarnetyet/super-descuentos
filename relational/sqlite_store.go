@@ -131,3 +131,17 @@ func (store *SQLStore) GetPosts(ctx context.Context, offset, limit int) ([]model
 
 	return postsWithAuthor, nil
 }
+
+func (store *SQLStore) CreateAuthor(ctx context.Context, author model.User) error {
+	err := store.Queries.CreateUser(ctx, repository.CreateUserParams{
+		ID:    author.ID.String(),
+		Name:  author.Name,
+		Email: author.Email,
+	})
+	if err != nil {
+		_ = fmt.Errorf("hubo un problema al intentar crear el autor: %v", err)
+		return errors.New("hubo un problema al intentar crear el autor")
+	}
+
+	return nil
+}

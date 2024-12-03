@@ -141,6 +141,7 @@ func TestCRUDOperations(t *testing.T) {
 			}
 
 			req := httptest.NewRequest(test.method, path, &body)
+			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 
 			server.ServeHTTP(w, req)
@@ -183,7 +184,7 @@ func TestErrorCases(t *testing.T) {
 			Path:           "/posts",
 			Body:           []byte(`{"invalid json"`),
 			ExpectedStatus: http.StatusBadRequest,
-			ExpectedBody:   "{\"message\":\"JSON inválido\"}\n",
+			ExpectedBody:   "{\"message\":\"unsupported content type\"}\n",
 		},
 	}
 

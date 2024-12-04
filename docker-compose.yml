@@ -16,6 +16,7 @@ services:
   tests:
     image: mcr.microsoft.com/playwright:v1.49.0-noble
     ipc: host  # Improve performance
+    user: 1000:1000
     volumes:
       - ./e2e:/e2e  # Mount your e2e test directory
     working_dir: /e2e

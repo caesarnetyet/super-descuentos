@@ -23,11 +23,4 @@ services:
       - BASE_URL=http://app:8080
     depends_on:
       - app
-    command: >
-      sh -c "
-        cd /e2e
-        npm init -y
-        npm install @playwright/test
-        npx playwright install-deps
-        npx playwright test
-      "
+    entrypoint: ["npx", "playwright", "test"]

@@ -13,9 +13,11 @@ test.describe('Super Descuentos Application E2E Tests', () => {
     await page.goto(`${BASE_URL}/authors`);
     await page.screenshot({path: 'screenshots/authors.png'});
 
+    const randomEmail = 'new_author_test' + Math.random().toString(36).substring(7) + '@example.com';
+
     // Fill out author creation form
     await page.fill('input[name="name"]', 'Test Author');
-    await page.fill('input[name="email"]', 'testauthor@example.com');
+    await page.fill('input[name="email"]', randomEmail);
     
     await page.click('button[type="submit"]');
 
@@ -23,7 +25,7 @@ test.describe('Super Descuentos Application E2E Tests', () => {
     await page.waitForURL(`${BASE_URL}/authors`);
 
     // Verify author was created (you might need to adjust this selector)
-    const authorExists = await page.getByText('testauthor@example.com').isVisible();
+    const authorExists = await page.getByText(randomEmail).isVisible();
     expect(authorExists).toBeTruthy();
   });
 
@@ -31,18 +33,22 @@ test.describe('Super Descuentos Application E2E Tests', () => {
   test('create a new post', async ({ page }) => {
     await page.goto(`${BASE_URL}/posts`);
     await page.screenshot({path: 'screenshots/posts.png'});
+    const randomEmail = 'postauthor' + Math.random().toString(36).substring(7) + '@example.com';
 
     // First, ensure we have an author to select
     await page.goto(`${BASE_URL}/authors`);
     await page.fill('input[name="name"]', 'Post Author');
-    await page.fill('input[name="email"]', 'postauthor@example.com');
+    await page.fill('input[name="email"]', randomEmail);
     await page.click('button[type="submit"]');
+    // verify if author was created, by checking if the email is visible
+    const authorExists = await page.getByText(randomEmail).isVisible();
+    expect(authorExists).toBeTruthy();
 
     // Navigate to posts page
     await page.goto(`${BASE_URL}/posts`);
 
     // Fill out post creation form
-    await page.selectOption('select[name="author_email"]', 'postauthor@example.com');
+    await page.selectOption('select[name="author_email"]', randomEmail);
     await page.fill('input[name="title"]', 'Test Discount Offer');
     await page.fill('textarea[name="content"]', 'Amazing discount available now!');
     await page.fill('input[name="url"]', 'https://example.com/discount');
@@ -53,8 +59,8 @@ test.describe('Super Descuentos Application E2E Tests', () => {
     await page.waitForURL(`${BASE_URL}/`);
 
     // Verify post was created and appears on home page
-    const postTitle = await page.getByText('Test Discount Offer').first();
-    expect(postTitle).toBeVisible();
+    const postTitle = page.getByText('Test Discount Offer').first();
+    await expect(postTitle).toBeVisible();
   });
 
   // Test home page functionality

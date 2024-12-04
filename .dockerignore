@@ -21,3 +21,5 @@
 .DS_Store
 
 e2e/node_modules
+./super-descuentos.db
+./super-descuentos.exe

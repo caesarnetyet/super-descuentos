@@ -139,7 +139,7 @@ func (store *SQLStore) CreateAuthor(ctx context.Context, author model.User) erro
 		Email: author.Email,
 	})
 	if err != nil {
-		_ = fmt.Errorf("hubo un problema al intentar crear el autor: %v", err)
+		fmt.Printf("hubo un problema al intentar crear el autor: %v \n", err)
 		return errors.New("hubo un problema al intentar crear el autor")
 	}
 

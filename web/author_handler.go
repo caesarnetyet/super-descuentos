@@ -1,15 +1,28 @@
 package web
 
 import (
+	"github.com/google/uuid"
 	"net/http"
 	"super-descuentos/components"
 	"super-descuentos/errs"
 	"super-descuentos/model"
+	"super-descuentos/utils"
 )
 
 func (s *Server) handleAuthorForm(w http.ResponseWriter, r *http.Request) {
-	component := components.Layout("Authors", components.AuthorsPage())
-	err := component.Render(r.Context(), w)
+	offset, limit, err := utils.GetOffsetAndLimit(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	authors, err := s.store.GetAuthors(r.Context(), offset, limit)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	component := components.Layout("Authors", components.AuthorsPage(authors))
+	err = component.Render(r.Context(), w)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -24,23 +37,23 @@ type HandleCreateAuthorFormRequest struct {
 }
 
 func (r HandleCreateAuthorFormRequest) Validate() model.ValidationErrors {
-	var errs model.ValidationErrors
+	var problems model.ValidationErrors
 
 	if r.Name == "" {
-		errs = append(errs, model.ValidationError{
+		problems = append(problems, model.ValidationError{
 			Field:   "name",
 			Message: "el nombre es requerido",
 		})
 	}
 
 	if r.Email == "" {
-		errs = append(errs, model.ValidationError{
+		problems = append(problems, model.ValidationError{
 			Field:   "email",
 			Message: "el correo electrónico es requerido",
 		})
 	}
 
-	return errs
+	return problems
 }
 
 func (s *Server) handleCreateAuthorForm(w http.ResponseWriter, r *http.Request) {
@@ -51,12 +64,13 @@ func (s *Server) handleCreateAuthorForm(w http.ResponseWriter, r *http.Request) 
 	}
 
 	author := model.User{
+		ID:    uuid.New(),
 		Name:  r.FormValue("name"),
 		Email: r.FormValue("email"),
 	}
 
-	if errs := author.Validate(); len(errs) > 0 {
-		http.Error(w, errs.Error(), http.StatusBadRequest)
+	if problems := author.Validate(); len(problems) > 0 {
+		http.Error(w, problems.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -66,5 +80,6 @@ func (s *Server) handleCreateAuthorForm(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	// refresh authors page
+	http.Redirect(w, r, "/authors", http.StatusSeeOther)
 }

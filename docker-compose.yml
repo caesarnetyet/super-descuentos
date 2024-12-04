@@ -23,4 +23,4 @@ services:
       - BASE_URL=http://app:8080
     depends_on:
       - app
-    entrypoint: ["npx", "playwright", "test"]
+    command: sh -c "npm install -D @playwright/test && npx playwright test"

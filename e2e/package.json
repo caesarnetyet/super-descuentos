@@ -1,7 +1,4 @@
 {
-  "dependencies": {
-    "@playwright/test": "^1.49.0"
-  },
   "name": "e2e",
   "version": "1.0.0",
   "main": "index.js",
@@ -11,5 +8,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
 }

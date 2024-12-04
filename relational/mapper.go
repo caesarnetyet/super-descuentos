@@ -1,9 +1,10 @@
 package relational
 
 import (
-	"github.com/google/uuid"
 	"super-descuentos/model"
 	"super-descuentos/relational/repository"
+
+	"github.com/google/uuid"
 )
 
 func RepositoryPostToModel(post repository.Post, user repository.User) model.Post {

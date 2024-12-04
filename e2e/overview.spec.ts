@@ -24,7 +24,7 @@ test.describe('Super Descuentos Application E2E Tests', () => {
     // Wait for navigation or confirmation
     await page.waitForURL(`${BASE_URL}/authors`);
 
-    // Verify author was created (you might need to adjust this selector)
+    // Verify author was created 
     const authorExists = await page.getByText(randomEmail).isVisible();
     expect(authorExists).toBeTruthy();
   });
@@ -35,7 +35,7 @@ test.describe('Super Descuentos Application E2E Tests', () => {
     await page.screenshot({path: 'screenshots/posts.png'});
     const randomEmail = 'postauthor' + Math.random().toString(36).substring(7) + '@example.com';
 
-    // First, ensure we have an author to select
+    // ensure we have an author to select
     await page.goto(`${BASE_URL}/authors`);
     await page.fill('input[name="name"]', 'Post Author');
     await page.fill('input[name="email"]', randomEmail);

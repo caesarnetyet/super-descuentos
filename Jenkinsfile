@@ -1,32 +1,30 @@
 pipeline {
-    agent any
+    agent {
+        docker { image 'golang:1.23.2' }
+    }
 
     environment {
-        IMAGE_NAME = 'super-descuentos' // Nombre de la imagen que se generará
+        IMAGE_NAME = 'super-descuentos'
     }
 
     stages {
-        // Obtener el código del repositorio
+        // Checkout del código
         stage('Checkout') {
             steps {
                 git 'https://github.com/caesarnetyet/super-descuentos'
             }
         }
 
-        // Ejecutar las pruebas Go
+        // Ejecutar pruebas
         stage('Run Go Tests') {
             steps {
                 script {
-                    // Ejecuta las pruebas Go, y si alguna falla, termina el pipeline
-                    def testResult = sh(script: 'go test ./...', returnStatus: true)
-                    if (testResult != 0) {
-                        error "Go tests failed. Aborting the pipeline."
-                    }
+                    sh 'go test ./...'
                 }
             }
         }
 
-        // Construir la imagen Docker solo si los tests fueron exitosos
+        // Construcción de imagen Docker
         stage('Build Docker Image') {
             steps {
                 script {
@@ -34,23 +32,18 @@ pipeline {
                 }
             }
         }
-        
-        // Ejecutar el contenedor principal
+
+        // Ejecutar contenedor principal
         stage('Run Main Container') {
             steps {
                 script {
-                    // Corre el contenedor principal basado en la imagen generada
+                    sh '''
+                    if [ $(docker ps -aq -f name=$IMAGE_NAME-container) ]; then
+                        docker stop $IMAGE_NAME-container || true
+                        docker rm $IMAGE_NAME-container || true
+                    fi
+                    '''
                     sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME'
-                }
-            }
-        }
-
-        // Ejecutar los servicios definidos en docker-compose.yml
-        stage('Run Test Services') {
-            steps {
-                script {
-                    // Levanta los servicios necesarios para pruebas
-                    sh 'docker compose up -d'
                 }
             }
         }
@@ -59,19 +52,8 @@ pipeline {
     post {
         always {
             script {
-                // Limpiar el entorno después de ejecutar las pruebas
-                sh 'docker-compose down || true' // Para asegurar que se detienen los servicios de pruebas si existen
+                sh 'docker-compose down || true'
             }
-
-            script {
-                // Imprimir un mensaje según el resultado del pipeline
-                if (currentBuild.result == 'SUCCESS') {
-                    echo 'El proceso se completó correctamente.'
-                } else {
-                    echo 'El proceso falló. Revisa los errores.'
-                }
-            }
-
             echo 'Pipeline terminado.'
         }
     }

@@ -34,37 +34,45 @@ pipeline {
                 }
             }
         }
-
+        
         // Ejecutar el contenedor principal
         stage('Run Main Container') {
             steps {
                 script {
-                    // Detener y eliminar el contenedor si ya existe
-                    sh '''
-                    if [ $(docker ps -aq -f name=$IMAGE_NAME-container) ]; then
-                        docker stop $IMAGE_NAME-container || true
-                        docker rm $IMAGE_NAME-container || true
-                    fi
-                    '''
                     // Corre el contenedor principal basado en la imagen generada
                     sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME'
                 }
             }
         }
 
+        // Ejecutar los servicios definidos en docker-compose.yml
+        stage('Run Test Services') {
+            steps {
+                script {
+                    // Levanta los servicios necesarios para pruebas
+                    sh 'docker compose up -d'
+                }
+            }
+        }
     }
 
     post {
         always {
-            // Imprimir mensaje según el resultado del pipeline
-            if (currentBuild.result == 'SUCCESS') {
-                echo 'El proceso se completó correctamente.'
-            } else {
-                echo 'El proceso falló. Revisa los errores.'
+            script {
+                // Limpiar el entorno después de ejecutar las pruebas
+                sh 'docker-compose down || true' // Para asegurar que se detienen los servicios de pruebas si existen
             }
-            
+
+            script {
+                // Imprimir un mensaje según el resultado del pipeline
+                if (currentBuild.result == 'SUCCESS') {
+                    echo 'El proceso se completó correctamente.'
+                } else {
+                    echo 'El proceso falló. Revisa los errores.'
+                }
+            }
+
             echo 'Pipeline terminado.'
         }
     }
-
 }

@@ -38,51 +38,24 @@ pipeline {
             }
             steps {
                 script {
-                    try {
-                        // Eliminar la imagen Docker si ya existe
-                        sh '''
-                            if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" != "" ]]; then
-                                docker rmi -f $IMAGE_NAME
-                            fi
-                        '''
-                        
-                        // Construir la imagen Docker a partir del Dockerfile
-                        sh 'docker build -t $IMAGE_NAME .'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e // Lanza la excepción para que el pipeline falle
-                    }
+                    // Construye la imagen Docker a partir del Dockerfile
+                    sh 'docker build -t $IMAGE_NAME .'
                 }
             }
         }
-
-        // Ejecutar el contenedor Docker solo si la imagen fue construida correctamente
+        
+        // Ejecutar el contenedor Docker solo si la imagen se construyó correctamente
         stage('Run Docker Container') {
             when {
                 branch 'main' // O cualquier otra condición para este paso
-                expression { return currentBuild.result == null || currentBuild.result == 'SUCCESS' } // Solo ejecutar si la imagen fue creada
             }
             steps {
                 script {
-                    try {
-                        // Eliminar el contenedor si ya está corriendo
-                        sh '''
-                            if [[ "$(docker ps -q -f name=$IMAGE_NAME-container)" != "" ]]; then
-                                docker stop $IMAGE_NAME-container
-                                docker rm $IMAGE_NAME-container
-                            fi
-                        '''
-                        
-                        // Corre contenedor en segundo plano con el puerto 8080 mapeado
-                        sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e // Lanza la excepción para que el pipeline falle
-                    }
+                    // Corre contenedor en segundo plano con el puerto 8080 mapeado
+                    sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME'
                 }
             }
         }
-
     }
     
     post {

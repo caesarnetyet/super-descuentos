@@ -39,7 +39,7 @@ pipeline {
             steps {
                 script {
                     // Construye la imagen Docker a partir del Dockerfile
-                    sh 'docker build -t $IMAGE_NAME .'
+                    sh 'docker build --no-cache -t $IMAGE_NAME .'
                 }
             }
         }

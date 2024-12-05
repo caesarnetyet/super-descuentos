@@ -17,10 +17,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Ejecutar los tests
                     sh 'echo "Ejecutando los tests..."'
-                    // Sustituye con tu comando de tests, como:
-                    // sh 'npm test' o sh 'pytest'
                 }
             }
         }
@@ -29,13 +26,12 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Eliminar imagen existente si ya existe
                     sh '''
+                        # Verificar y eliminar la imagen si ya existe
                         if docker images -q $IMAGE_NAME > /dev/null; then
                             docker rmi -f $IMAGE_NAME
                         fi
                     '''
-                    // Construir nueva imagen
                     sh 'docker build -t $IMAGE_NAME .'
                 }
             }
@@ -45,15 +41,18 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Detener y eliminar el contenedor si ya está corriendo
                     sh '''
+                        # Verificar y detener/eliminar el contenedor si ya existe
                         if docker ps -q -f name=$IMAGE_NAME-container > /dev/null; then
                             docker stop $IMAGE_NAME-container
                             docker rm $IMAGE_NAME-container
+                        elif docker ps -a -q -f name=$IMAGE_NAME-container > /dev/null; then
+                            docker rm $IMAGE_NAME-container
                         fi
+
+                        # Correr el contenedor
+                        docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME
                     '''
-                    // Correr el contenedor
-                    sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME'
                 }
             }
         }

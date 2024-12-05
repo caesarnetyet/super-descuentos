@@ -34,7 +34,7 @@ pipeline {
         // Construir la imagen Docker solo si los tests son exitosos
         stage('Build Docker Image') {
             when {
-                branch 'main' // O cualquier otra condición para este paso
+                branch 'master' // O cualquier otra condición para este paso
             }
             steps {
                 script {
@@ -47,7 +47,7 @@ pipeline {
         // Ejecutar el contenedor Docker solo si la imagen se construyó correctamente
         stage('Run Docker Container') {
             when {
-                branch 'main' // O cualquier otra condición para este paso
+                branch 'master' // O cualquier otra condición para este paso
             }
             steps {
                 script {

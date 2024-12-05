@@ -2,56 +2,39 @@ pipeline {
     agent any
     
     environment {
-        IMAGE_NAME = 'super-descuentos'   // Nombre de la imagen que se generará
+        IMAGE_NAME = 'super-descuentos'
     }
     
     stages {
-        // Obtener el código del repositorio
         stage('Checkout') {
             steps {
-                // Clona el repo
                 git 'https://github.com/caesarnetyet/super-descuentos'
             }
         }
-        
-        // Construir la imagen Docker
+
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Construye la imagen Docker a partir del Dockerfile
                     sh 'docker build -t $IMAGE_NAME .'
                 }
             }
         }
-        
-        // Ejecutar el contenedor principal
-        stage('Run Main Container') {
-            steps {
-                script {
-                    // Corre el contenedor principal basado en la imagen generada
-                    sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME'
-                }
-            }
-        }
 
-        // Ejecutar los servicios definidos en docker-compose.yml
-        stage('Run Test Services') {
+        stage('Run Services') {
             steps {
                 script {
-                    // Levanta los servicios necesarios para pruebas
-                    sh 'docker compose up -d'
+                    // Detecta automáticamente si usa `docker compose` o `docker-compose`
+                    def composeCommand = sh(script: 'docker compose version > /dev/null 2>&1 && echo "docker compose" || echo "docker-compose"', returnStdout: true).trim()
+                    sh "${composeCommand} up -d"
                 }
             }
         }
     }
-    
+
     post {
         always {
             script {
-                // Detener los servicios de pruebas
-                sh 'docker compose down || true'
-                
-                // Publica el reporte HTML en la interfaz de Jenkins
+                sh 'docker-compose down || docker compose down || true'
                 publishHTML([
                     target: [
                         allowMissing: true,
@@ -62,7 +45,6 @@ pipeline {
                     ]
                 ])
             }
-            echo 'Pipeline terminado.'
         }
     }
 }

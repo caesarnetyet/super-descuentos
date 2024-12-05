@@ -17,15 +17,7 @@ pipeline {
         stage('Run Test Services') {
             steps {
                 script {
-                    // Levanta los servicios necesarios para pruebas
-                    // Cambia a `docker-compose` si `docker compose` no está disponible
-                    sh '''
-                    if docker compose version > /dev/null 2>&1; then
-                        docker compose up -d
-                    else
-                        docker-compose up -d
-                    fi
-                    '''
+                    sh 'docker-compose up -d'
                 }
             }
         }
@@ -37,20 +29,14 @@ pipeline {
                     sh 'docker build -t $IMAGE_NAME .'
                 }
             }
-        }    
+        }
     }
 
     post {
         always {
             script {
                 // Detener y limpiar los servicios de pruebas
-                sh '''
-                if docker compose version > /dev/null 2>&1; then
-                    docker compose down || true
-                else
-                    docker-compose down || true
-                fi
-                '''
+                sh 'docker-compose down'
                 // Publica el reporte HTML en la interfaz de Jenkins
                 publishHTML([
                     target: [

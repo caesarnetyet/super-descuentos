@@ -13,6 +13,23 @@ pipeline {
             }
         }
 
+        // Ejecutar los servicios de pruebas
+        stage('Run Test Services') {
+            steps {
+                script {
+                    // Levanta los servicios necesarios para pruebas
+                    // Cambia a `docker-compose` si `docker compose` no está disponible
+                    sh '''
+                    if docker compose version > /dev/null 2>&1; then
+                        docker compose up -d
+                    else
+                        docker-compose up -d
+                    fi
+                    '''
+                }
+            }
+        }
+
         // Construir la imagen Docker
         stage('Build Docker Image') {
             steps {
@@ -39,22 +56,7 @@ pipeline {
             }
         }
 
-        // Ejecutar los servicios de pruebas
-        stage('Run Test Services') {
-            steps {
-                script {
-                    // Levanta los servicios necesarios para pruebas
-                    // Cambia a `docker-compose` si `docker compose` no está disponible
-                    sh '''
-                    if docker compose version > /dev/null 2>&1; then
-                        docker compose up -d
-                    else
-                        docker-compose up -d
-                    fi
-                    '''
-                }
-            }
-        }
+        
     }
 
     post {

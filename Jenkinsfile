@@ -13,16 +13,20 @@ pipeline {
             }
         }
 
-        // Ejecutar los servicios de pruebas
-        stage('Run Test Services') {
+        // Ejecutar las pruebas Go
+        stage('Run Go Tests') {
             steps {
                 script {
-                    sh 'docker-compose up -d'
+                    // Ejecuta las pruebas Go, y si alguna falla, termina el pipeline
+                    def testResult = sh(script: 'go test ./...', returnStatus: true)
+                    if (testResult != 0) {
+                        error "Go tests failed. Aborting the pipeline."
+                    }
                 }
             }
         }
 
-        // Construir la imagen Docker
+        // Construir la imagen Docker solo si los tests fueron exitosos
         stage('Build Docker Image') {
             steps {
                 script {
@@ -52,21 +56,15 @@ pipeline {
 
     post {
         always {
-            script {
-                // Detener y limpiar los servicios de pruebas
-                sh 'docker-compose down'
-                // Publica el reporte HTML en la interfaz de Jenkins
-                publishHTML([
-                    target: [
-                        allowMissing: true,
-                        keepAll: true,
-                        reportDir: 'e2e/playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Playwright Test Report'
-                    ]
-                ])
+            // Imprimir mensaje según el resultado del pipeline
+            if (currentBuild.result == 'SUCCESS') {
+                echo 'El proceso se completó correctamente.'
+            } else {
+                echo 'El proceso falló. Revisa los errores.'
             }
+            
             echo 'Pipeline terminado.'
         }
     }
+
 }

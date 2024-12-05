@@ -27,8 +27,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        # Verificar y eliminar la imagen si ya existe
-                        if docker images -q $IMAGE_NAME > /dev/null; then
+                        # Eliminar la imagen Docker si ya existe
+                        if [ "$(docker images -q $IMAGE_NAME 2>/dev/null)" != "" ]; then
                             docker rmi -f $IMAGE_NAME
                         fi
                     '''
@@ -42,15 +42,15 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        # Verificar y detener/eliminar el contenedor si ya existe
-                        if docker ps -q -f name=$IMAGE_NAME-container > /dev/null; then
-                            docker stop $IMAGE_NAME-container
-                            docker rm $IMAGE_NAME-container
-                        elif docker ps -a -q -f name=$IMAGE_NAME-container > /dev/null; then
-                            docker rm $IMAGE_NAME-container
+                        # Verificar si el contenedor existe
+                        if [ "$(docker ps -aq -f name=$IMAGE_NAME-container)" != "" ]; then
+                            echo "Contenedor existente encontrado. Eliminando..."
+                            docker stop $IMAGE_NAME-container || true
+                            docker rm $IMAGE_NAME-container || true
                         fi
 
-                        # Correr el contenedor
+                        # Correr el nuevo contenedor
+                        echo "Iniciando el contenedor..."
                         docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME
                     '''
                 }

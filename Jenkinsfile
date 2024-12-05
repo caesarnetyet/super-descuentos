@@ -39,7 +39,7 @@ pipeline {
             steps {
                 script {
                     // Levanta los servicios necesarios para pruebas
-                    sh 'docker compose up -d'
+                    sh 'docker compose up'
                 }
             }
         }

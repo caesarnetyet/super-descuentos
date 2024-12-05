@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Clona el repo
-                git 'https://github.com/tu-usuario/tu-repo.git'
+                git 'https://github.com/caesarnetyet/super-descuentos'
             }
         }
         

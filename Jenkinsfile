@@ -1,59 +1,43 @@
 pipeline {
-    agent {
-        docker { image 'golang:1.23.2' }
-    }
-
+    agent any
+    
     environment {
-        IMAGE_NAME = 'super-descuentos'
+        IMAGE_NAME = 'super-descuentos'   // Nombre de la imagen que se generará
     }
-
+    
     stages {
-        // Checkout del código
+        // Obtener el código del repositorio
         stage('Checkout') {
             steps {
-                git 'https://github.com/caesarnetyet/super-descuentos'
+                // Clona el repo
+                git 'https://github.com/tu-usuario/tu-repo.git'
             }
         }
-
-        // Ejecutar pruebas
-        stage('Run Go Tests') {
-            steps {
-                script {
-                    sh 'go test ./...'
-                }
-            }
-        }
-
-        // Construcción de imagen Docker
+        
+        // Construir la imagen Docker
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Construye la imagen Docker a partir del Dockerfile
                     sh 'docker build -t $IMAGE_NAME .'
                 }
             }
         }
-
-        // Ejecutar contenedor principal
-        stage('Run Main Container') {
+        
+        // Ejecutar el contenedor Docker
+        stage('Run Docker Container') {
             steps {
                 script {
-                    sh '''
-                    if [ $(docker ps -aq -f name=$IMAGE_NAME-container) ]; then
-                        docker stop $IMAGE_NAME-container || true
-                        docker rm $IMAGE_NAME-container || true
-                    fi
-                    '''
+                    // Corre contenedor en segundo plano con el puerto 8080 mapeado
                     sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME'
                 }
             }
         }
     }
-
+    
     post {
         always {
-            script {
-                sh 'docker-compose down || true'
-            }
+            // Pasos que siempre deben ejecutarse (limpieza, notificaciones etc...)
             echo 'Pipeline terminado.'
         }
     }

@@ -24,12 +24,22 @@ pipeline {
             }
         }
         
-        // Ejecutar el contenedor Docker
-        stage('Run Docker Container') {
+        // Ejecutar el contenedor principal
+        stage('Run Main Container') {
             steps {
                 script {
-                    // Corre contenedor en segundo plano con el puerto 8080 mapeado
+                    // Corre el contenedor principal basado en la imagen generada
                     sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME'
+                }
+            }
+        }
+
+        // Ejecutar los servicios definidos en docker-compose.yml
+        stage('Run Test Services') {
+            steps {
+                script {
+                    // Levanta los servicios necesarios para pruebas
+                    sh 'docker compose up -d'
                 }
             }
         }
@@ -37,7 +47,21 @@ pipeline {
     
     post {
         always {
-            // Pasos que siempre deben ejecutarse (limpieza, notificaciones etc...)
+            script {
+                // Detener los servicios de pruebas
+                sh 'docker compose down || true'
+                
+                // Publica el reporte HTML en la interfaz de Jenkins
+                publishHTML([
+                    target: [
+                        allowMissing: true,
+                        keepAll: true,
+                        reportDir: 'e2e/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright Test Report'
+                    ]
+                ])
+            }
             echo 'Pipeline terminado.'
         }
     }

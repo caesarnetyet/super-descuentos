@@ -38,24 +38,39 @@ pipeline {
             }
             steps {
                 script {
+                    // Eliminar la imagen Docker si ya existe
+                    sh '''
+                        if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" != "" ]]; then
+                            docker rmi -f $IMAGE_NAME
+                        fi
+                    '''
+                    
                     // Construye la imagen Docker a partir del Dockerfile
                     sh 'docker build -t $IMAGE_NAME .'
                 }
             }
         }
-        
-        // Ejecutar el contenedor Docker solo si la imagen se construyó correctamente
+
         stage('Run Docker Container') {
             when {
                 branch 'main' // O cualquier otra condición para este paso
             }
             steps {
                 script {
+                    // Eliminar el contenedor si ya está corriendo
+                    sh '''
+                        if [[ "$(docker ps -q -f name=$IMAGE_NAME-container)" != "" ]]; then
+                            docker stop $IMAGE_NAME-container
+                            docker rm $IMAGE_NAME-container
+                        fi
+                    '''
+                    
                     // Corre contenedor en segundo plano con el puerto 8080 mapeado
                     sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME'
                 }
             }
         }
+
     }
     
     post {

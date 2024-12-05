@@ -4,7 +4,7 @@ FROM golang:1.23.2
 WORKDIR /app
 
 # Crear el directorio /e2e si no existe y darle permisos 777 (todos los permisos)
-RUN mkdir -p /e2e && chmod -R 777 /e2e
+RUN mkdir -p /e2e && chmod -R 777 /e2e/node_modules
 
 COPY go.mod go.sum ./
 RUN go mod download

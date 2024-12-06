@@ -8,6 +8,8 @@ RUN go mod download
 
 COPY . .
 
+RUN go test -v  ./relational/... ./rest/...
+
 RUN CGO_ENABLED=0 GOOS=linux go build -o /super-descuentos
 
 EXPOSE 8080

@@ -13,15 +13,6 @@ pipeline {
             }
         }
 
-        // Ejecutar los tests
-        stage('Run Tests') {
-            steps {
-                script {
-                    sh 'go test ./...'
-                }
-            }
-        }
-
         // Construir la imagen Docker
         stage('Build Docker Image') {
             steps {

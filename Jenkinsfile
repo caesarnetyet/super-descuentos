@@ -41,8 +41,8 @@ pipeline {
                         fi
 
                         # Correr el nuevo contenedor
-                        echo "Iniciando el contenedor..."
-                        docker run -d -p 8080:8080 --name $IMAGE_NAME-container $IMAGE_NAME
+                        docker compose down -v
+                        docker compose up -d --build
                     '''
                 }
             }

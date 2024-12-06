@@ -1,12 +1,13 @@
 package web
 
 import (
-	"github.com/google/uuid"
 	"net/http"
 	"super-descuentos/components"
 	"super-descuentos/errs"
 	"super-descuentos/model"
 	"super-descuentos/utils"
+
+	"github.com/google/uuid"
 )
 
 func (s *Server) handleAuthorForm(w http.ResponseWriter, r *http.Request) {
@@ -29,31 +30,6 @@ func (s *Server) handleAuthorForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-}
-
-type HandleCreateAuthorFormRequest struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
-
-func (r HandleCreateAuthorFormRequest) Validate() model.ValidationErrors {
-	var problems model.ValidationErrors
-
-	if r.Name == "" {
-		problems = append(problems, model.ValidationError{
-			Field:   "name",
-			Message: "el nombre es requerido",
-		})
-	}
-
-	if r.Email == "" {
-		problems = append(problems, model.ValidationError{
-			Field:   "email",
-			Message: "el correo electrónico es requerido",
-		})
-	}
-
-	return problems
 }
 
 func (s *Server) handleCreateAuthorForm(w http.ResponseWriter, r *http.Request) {

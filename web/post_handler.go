@@ -23,47 +23,6 @@ func (s *Server) handlePostForm(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type HandleCreatePostFormRequest struct {
-	Title       string `json:"title" form:"title"`
-	Content     string `json:"content" form:"content"`
-	AuthorEmail string `json:"author_email" form:"author_email"`
-	Url         string `json:"url" form:"url"`
-}
-
-func (r HandleCreatePostFormRequest) Validate() model.ValidationErrors {
-	var errs model.ValidationErrors
-
-	if r.Title == "" {
-		errs = append(errs, model.ValidationError{
-			Field:   "title",
-			Message: "el título es requerido",
-		})
-	}
-
-	if r.Content == "" {
-		errs = append(errs, model.ValidationError{
-			Field:   "content",
-			Message: "el contenido es requerido",
-		})
-	}
-
-	if r.AuthorEmail == "" {
-		errs = append(errs, model.ValidationError{
-			Field:   "author_email",
-			Message: "el correo electrónico del autor es requerido",
-		})
-	}
-
-	if r.Url == "" {
-		errs = append(errs, model.ValidationError{
-			Field:   "url",
-			Message: "la URL es requerida",
-		})
-	}
-
-	return errs
-}
-
 func (s *Server) handleCreatePostForm(w http.ResponseWriter, r *http.Request) {
 
 	request, err := model.DecodeAndValidate[HandleCreatePostFormRequest](r)

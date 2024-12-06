@@ -156,37 +156,7 @@ func TestCRUDOperations(t *testing.T) {
 }
 
 func TestErrorCases(t *testing.T) {
-	tests := []struct {
-		Name           string
-		Method         string
-		Path           string
-		Body           interface{}
-		ExpectedStatus int
-		ExpectedBody   string
-	}{
-		{
-			Name:           "Get Non-existent Post",
-			Method:         "GET",
-			Path:           "/posts/" + uuid.New().String(),
-			ExpectedStatus: http.StatusNotFound,
-			ExpectedBody:   "{\"message\":\"post no encontrado\"}\n",
-		},
-		{
-			Name:           "Invalid UUID",
-			Method:         "GET",
-			Path:           "/posts/invalid-uuid",
-			ExpectedStatus: http.StatusBadRequest,
-			ExpectedBody:   "{\"message\":\"id inválido\"}\n",
-		},
-		{
-			Name:           "Invalid JSON",
-			Method:         "POST",
-			Path:           "/posts",
-			Body:           []byte(`{"invalid json"`),
-			ExpectedStatus: http.StatusBadRequest,
-			ExpectedBody:   "{\"message\":\"unsupported content type\"}\n",
-		},
-	}
+	tests := rest.ErrCaseMock
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
@@ -203,17 +173,17 @@ func TestErrorCases(t *testing.T) {
 			}
 
 			req := httptest.NewRequest(test.Method, test.Path, &body)
-			w := httptest.NewRecorder()
+			writer := httptest.NewRecorder()
 
-			server.ServeHTTP(w, req)
+			server.ServeHTTP(writer, req)
 
-			if w.Code != test.ExpectedStatus {
-				body := w.Body.String()
-				t.Errorf("Expected status %d, got %d. details: %q", test.ExpectedStatus, w.Code, body)
+			if writer.Code != test.ExpectedStatus {
+				body := writer.Body.String()
+				t.Errorf("Expected status %d, got %d. details: %q", test.ExpectedStatus, writer.Code, body)
 			}
 
-			if w.Body.String() != test.ExpectedBody {
-				t.Errorf("Expected body %s, got %s", test.ExpectedBody, w.Body.String())
+			if writer.Body.String() != test.ExpectedBody {
+				t.Errorf("Expected body %s, got %s", test.ExpectedBody, writer.Body.String())
 			}
 		})
 	}

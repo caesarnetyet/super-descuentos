@@ -34,6 +34,6 @@ var ErrCaseMock = []struct {
 		Path:           "/posts",
 		Body:           []byte(`{"invalid json"`),
 		ExpectedStatus: http.StatusBadRequest,
-		ExpectedBody:   "{\"message\":\"JSON inválido\"}\n",
+		ExpectedBody:   "{\"message\":\"unsupported content type\"}\n",
 	},
 }
